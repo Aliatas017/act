@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>İslamiyet Öncesi Türk Tarihi - Sonsuz Bulmaca</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Confetti JS for celebrations -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            /* Orta Asya bozkırlarını ve Turkuaz (Türk mavisi) rengini yansıtan arka plan */
+            background: linear-gradient(-45deg, #0f172a, #115e59, #083344, #78350f);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            scroll-behavior: smooth;
+        }
+        
+        h1, h2, .font-title {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #progress-bar { transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        /* Kutu Kutu Bulmaca Stilleri */
+        .letter-box {
+            font-family: 'JetBrains Mono', monospace;
+            box-shadow: 0 2px 0 #cbd5e1;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .puzzle-container.is-focused .letter-box {
+            border-color: #0d9488; /* Teal 600 */
+            box-shadow: 0 3px 0 #0d9488;
+            transform: translateY(-2px);
+        }
+
+        .puzzle-container.correct .letter-box {
+            border-color: #10b981 !important;
+            background-color: #ecfdf5 !important;
+            color: #047857 !important;
+            box-shadow: 0 3px 0 #059669 !important;
+        }
+        
+        .puzzle-container.hinted .letter-box {
+            border-color: #f59e0b !important;
+            background-color: #fffbeb !important;
+            color: #b45309 !important;
+            box-shadow: 0 3px 0 #d97706 !important;
+        }
+
+        .puzzle-container.incorrect .letter-box {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+            color: #b91c1c !important;
+            box-shadow: 0 3px 0 #dc2626 !important;
+        }
+
+        .pop-letter {
+            animation: popLetter 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popLetter {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); color: #0d9488; }
+            100% { transform: scale(1); }
+        }
+
+        .puzzle-container.incorrect {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        .puzzle-container.correct {
+            animation: bounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.9) translateY(0); opacity: 0.5; }
+            50% { transform: scale(1.05) translateY(-4px); opacity: 1; }
+            100% { transform: scale(1) translateY(0); }
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(3px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+            40%, 60% { transform: translate3d(5px, 0, 0); }
+        }
+
+        /* Floating Score Animation */
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(0.8); }
+            50% { transform: translateY(-20px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-40px) scale(1); }
+        }
+        .animate-float-up {
+            animation: floatUp 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Question Card Style */
+        .question-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .question-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+            border-color: rgba(13, 148, 136, 0.4);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        /* Custom Scrollbar for mobile swiping */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            background-color: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            transform: scale(0.8) translateY(20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="text-stone-800 pb-24">
+
+    <!-- Top Progress Bar -->
+    <div class="fixed top-0 left-0 w-full h-1 sm:h-2 bg-slate-900/50 backdrop-blur z-[60]">
+        <div id="progress-bar" class="h-full bg-gradient-to-r from-teal-400 via-cyan-500 to-amber-500 w-0 rounded-r-full shadow-[0_0_10px_rgba(20,184,166,0.8)]"></div>
+    </div>
+
+    <!-- HUD / Controls Header -->
+    <div class="sticky top-1 sm:top-2 z-50 px-2 sm:px-6">
+        <div class="max-w-6xl mx-auto bg-white/95 backdrop-blur-xl shadow-[0_8px_20px_rgb(0,0,0,0.12)] border border-white rounded-2xl sm:rounded-3xl p-2 sm:p-4 flex flex-col md:flex-row justify-between items-center gap-2 sm:gap-4 transition-all hover:bg-white">
+            <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start px-1 sm:px-0">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-teal-600 to-cyan-800 flex items-center justify-center text-white text-lg sm:text-xl shadow-lg shadow-teal-200 rotate-3 font-title border border-teal-500 shrink-0">
+                        🐺
+                    </div>
+                    <div>
+                        <h1 class="text-base sm:text-xl font-extrabold text-slate-800 font-title tracking-wide leading-tight">
+                            İslamiyet Öncesi
+                        </h1>
+                        <p class="text-[9px] sm:text-[11px] text-teal-700 font-bold tracking-widest uppercase">Türk Tarihi Rastgele Sınav</p>
+                    </div>
+                </div>
+                
+                <!-- Timer HUD -->
+                <div class="flex items-center gap-1 sm:gap-2 bg-slate-800 text-white px-3 py-1 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl shadow-inner font-mono text-xs sm:text-base font-bold border-2 border-slate-700 shrink-0">
+                    ⏳ <span id="timer-display" class="tracking-wider text-teal-400">00:00</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 hide-scrollbar pt-1 md:pt-0">
+                <div id="score-wrapper" class="bg-gradient-to-r from-amber-100 to-yellow-100 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl font-black text-xs sm:text-base text-amber-900 min-w-max border-2 border-amber-200 flex items-center gap-1 sm:gap-2 shadow-sm">
+                    🏆 <span id="score-display" class="text-amber-700 text-sm sm:text-lg">0</span> / <span id="total-display">0</span>
+                </div>
+                <button id="btn-check" onclick="checkAnswers()" class="bg-gradient-to-b from-teal-500 to-teal-700 hover:from-teal-600 hover:to-teal-800 text-white px-3 sm:px-6 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-xs sm:text-base font-bold transition-all shadow-[0_3px_0_rgb(15,118,110)] sm:shadow-[0_4px_0_rgb(15,118,110)] active:shadow-[0_0px_0_rgb(15,118,110)] active:translate-y-1 min-w-max flex items-center gap-1 sm:gap-2">
+                    ✨ Kontrol Et
+                </button>
+                <button id="btn-show" onclick="showAnswers()" class="bg-gradient-to-b from-amber-500 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl text-xs sm:text-base font-bold transition-all shadow-[0_3px_0_rgb(180,83,9)] sm:shadow-[0_4px_0_rgb(180,83,9)] active:shadow-[0_0px_0_rgb(180,83,9)] active:translate-y-1 min-w-max">
+                    👁️ Çözüm
+                </button>
+                <button id="btn-reset" onclick="generateNewSession(true)" class="bg-gradient-to-b from-slate-300 to-slate-400 hover:from-slate-400 hover:to-slate-500 text-slate-800 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl text-[11px] sm:text-sm font-bold transition-all shadow-[0_3px_0_rgb(100,116,139)] sm:shadow-[0_4px_0_rgb(100,116,139)] active:shadow-[0_0px_0_rgb(100,116,139)] active:translate-y-1 min-w-max">
+                    ↻ Yepyeni Sorular Getir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto px-2 sm:px-6 py-4 sm:py-8">
+        
+        <!-- Info Alert -->
+        <div class="bg-white/95 backdrop-blur rounded-2xl sm:rounded-3xl p-4 sm:p-5 mb-6 sm:mb-8 border sm:border-2 border-teal-100 shadow-[0_4px_20px_rgb(0,0,0,0.08)] flex gap-3 sm:gap-4 items-center transform hover:scale-[1.01] transition-transform mx-1 sm:mx-0">
+            <div class="text-3xl sm:text-4xl animate-bounce shrink-0">📜</div>
+            <div>
+                <h3 class="font-bold text-teal-900 text-base sm:text-lg mb-1 font-title">Ötüken Soru Havuzu Makinesi</h3>
+                <p class="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed">
+                    Bu oyunlaştırılmış denemede <strong>180 soruluk dev havuzdan</strong> her sıfırlamada rastgele <strong>25'er soru</strong> gelir. 
+                    <br class="hidden sm:block"><span class="text-teal-700">💡 <em>Kelimeleri büyük-küçük harf takıntısı olmadan rahatça yazabilirsiniz.</em></span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Tabs Container -->
+        <div id="tabs-container" class="flex gap-2 mb-4 sm:mb-6 overflow-x-auto hide-scrollbar pb-2 px-1 scroll-smooth">
+            <!-- Tabs injected via JS -->
+        </div>
+
+        <!-- Sections Container -->
+        <div id="quiz-container" class="pb-10">
+            <!-- Questions injected via JS -->
+        </div>
+
+    </div>
+
+    <!-- Custom Modal for Results -->
+    <div id="result-modal" class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl max-w-sm w-full p-6 sm:p-8 text-center border-4 border-teal-100 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-24 sm:h-32 bg-gradient-to-br from-teal-500 to-cyan-700 -z-10 rounded-t-[1.3rem] sm:rounded-t-[1.7rem]"></div>
+            
+            <div id="modal-icon" class="text-5xl sm:text-6xl mb-2 mt-2 sm:mt-4 drop-shadow-xl bg-white w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full flex items-center justify-center border-4 border-teal-200">🎉</div>
+            <h3 id="modal-title" class="text-2xl sm:text-3xl font-black text-slate-800 mb-2 font-title mt-4">Mükemmel!</h3>
+            <p id="modal-message" class="text-sm sm:text-base text-slate-500 font-medium mb-6">Bölümdeki tüm soruları doğru cevapladınız.</p>
+            
+            <div class="bg-slate-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 mb-6 flex justify-around items-center border-2 border-slate-100">
+                <div>
+                    <div class="text-[10px] sm:text-xs text-slate-400 font-black uppercase tracking-widest mb-1">SKOR</div>
+                    <div id="modal-score" class="text-xl sm:text-2xl font-black text-teal-600 drop-shadow-sm">10/10</div>
+                </div>
+                <div class="w-1 h-10 sm:h-12 bg-slate-200 rounded-full"></div>
+                <div>
+                    <div class="text-[10px] sm:text-xs text-slate-400 font-black uppercase tracking-widest mb-1">SÜRE</div>
+                    <div id="modal-time" class="text-xl sm:text-2xl font-black text-slate-700 drop-shadow-sm">01:45</div>
+                </div>
+            </div>
+
+            <button onclick="closeModal()" class="w-full bg-gradient-to-b from-teal-500 to-teal-700 hover:from-teal-600 hover:to-teal-800 text-white font-black text-base sm:text-lg py-3 sm:py-4 px-4 rounded-xl sm:rounded-2xl transition-all shadow-[0_4px_0_rgb(15,118,110)] sm:shadow-[0_6px_0_rgb(15,118,110)] active:shadow-[0_0px_0_rgb(15,118,110)] active:translate-y-2">
+                Devam Et 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- 1. HAVUZ: TÜRK DEVLETLERİ (SİYASİ TARİH) ---
+        const poolDevletler = [
+            "Tarihte bilinen teşkilatlı ilk Türk devleti [Asya] Hun Devleti'dir.",
+            "Asya Hun Devleti'nin tarihte bilinen ilk hükümdarı [Teoman] dır.",
+            "Çinlilerin Türk akınlarını durdurmak amacıyla inşa ettiği büyük yapı [Çin] Seddi'dir.",
+            "Asya Hun Devleti'ne en parlak dönemini yaşatan ve Çin'i vergiye bağlayan lider [Mete] Han'dır.",
+            "Mete Han, Çin'i yense de kalabalık nüfus içinde asimile olmamak için oraya yerleşmemiş, sadece [Vergiye] bağlamıştır.",
+            "Mete Han'dan sonra devlet zayıflamış ve Çin prensesleriyle gelen [Casusluk] faaliyetleri yıkılışı hızlandırmıştır.",
+            "Çin egemenliğine girmeyi onursuzluk sayarak reddeden ve batıya göçen Hun lideri [Çiçi] dir.",
+            "Kuzey Hunlarının Balamir önderliğinde batıya doğru başlattığı tarihi olaya [Kavimler] Göçü denir.",
+            "Kavimler Göçü sonucunda İlk Çağ kapanmış, [Orta] Çağ başlamıştır.",
+            "Kavimler Göçü ile birlikte Avrupa'da toprağa dayalı siyasi sistem olan [Feodalite] (Derebeylik) ortaya çıkmıştır.",
+            "Kavimler Göçü sonrasında Kilisenin baskıcı düşünce sistemi olan [Skolastik] düşünce Avrupa'ya hakim olmuştur.",
+            "Avrupa kıtasında kurulan ilk Türk devleti [Avrupa] Hun Devleti'dir.",
+            "Avrupa Hun Devleti'nin kurucusu, Kavimler Göçü'nün de lideri olan [Balamir] dir.",
+            "'Güneşin battığı yere kadar her yeri zaptedebilirim' sözünü söyleyen Avrupa Hun lideri [Uldız] dır.",
+            "Türkler Anadolu'ya ilk ayak basışlarını [Uldız] döneminde Avrupa Hunları ile gerçekleştirmiştir.",
+            "Avrupa Hun Devleti'ne en parlak ve ihtişamlı dönemini yaşatan lider [Atilla] dır.",
+            "Atilla, Doğu Roma'yı (Bizans) vergiye bağlamak için [Margus] ve Anatolyus antlaşmalarını imzalamıştır.",
+            "Atilla'nın Batı Roma üzerine düzenlediği meşhur seferler [Galya] ve İtalya seferleridir.",
+            "İtalya seferinde Roma kapılarına dayanan Atilla'dan af dileyen din adamı Papa I. [Leo] dur.",
+            "Avrupalıların Atilla'nın gücünden korkarak ona verdikleri efsanevi lakap Tanrının [Kırbacı] dır.",
+            "Avrupa Hunları, zayıfladıktan sonra Avrupa'da tutunamamış ve yerli halk içinde [Asimile] olmuşlardır.",
+            "Göçebe Hunların batıya ilerleyişi sırasında ittikleri Gotlar, Vandallar, Franklar gibi topluluklara barbar [Kavimler] denir.",
+            "Tarihte Türk adıyla kurulan ilk devlet I. [Göktürk] Devleti'dir.",
+            "Töles isyanını bastırıp Avarlara isyan ederek devleti kuran demirci ustası [Bumin] Kağan'dır.",
+            "Bumin Kağan devleti kurduktan sonra 'devleti derleyen' anlamındaki [İl] Kağan unvanını almıştır.",
+            "Göktürklerde devleti doğu-batı olarak ikili teşkilatla yöneten ve batıyı yöneten kardeş [İstemi] Yabgu'dur.",
+            "I. Göktürk Devleti gücünün zirvesini ve en parlak dönemini [Mukan] Kağan zamanında yaşamıştır.",
+            "İpek Yolu'na hakim olmak için Sasanilerle anlaşıp [Akhunlar] (Eftalitler) devletine son vermişlerdir.",
+            "Orta Asya'dan Bizans'a gönderilen ilk diplomatik Türk elçisinin adı [Manyak] tır.",
+            "Elli yıllık Çin esareti sırasında 39 arkadaşıyla sarayı basan meşhur kahraman [Kürşat] tır.",
+            "[Kürşat] ayaklanması Türk tarihindeki ilk milli Bağımsızlık ayaklanması olarak kabul edilir.",
+            "Çin'e isyan ederek II. Göktürk Devleti'ni (Kutluk) kuran lider [Kutluk] Kağan'dır.",
+            "Kutluk Kağan'a 'devleti toparlayan' anlamına gelen [İlteriş] unvanı verilmiştir.",
+            "İlteriş Kağan'ın en büyük yardımcısı olan ve 'Türklerin Bismarck'ı' sayılan kişi Vezir [Tonyukuk] tur.",
+            "II. Göktürk devleti en parlak dönemini [Bilge] Kağan zamanında yaşamıştır.",
+            "Basmıl ve Karluklarla birleşerek Göktürkleri yıkan ve Uygur Devleti'ni kuran lider Kutluk Bilge Kül [Kağan] dır.",
+            "Uygurların başkenti ilk başta Ötüken iken daha sonra [Karabalgasun] şehrine taşınmıştır.",
+            "Tarihte konar-göçerliği bırakıp yerleşik hayata geçen ilk Türk devleti [Uygurlar] dır.",
+            "Kırgızlar tarafından yıkılan Uygurların günümüzdeki torunları, Çin'deki [Doğu] Türkistan (Sincan) özerk bölgesinde yaşar.",
+            "Hem Asya'da hem Avrupa'da devlet kuran iki Türk boyundan biri Hunlar, diğeri ise [Avarlar] dır.",
+            "Çinlilerin 'Juan Juan', Göktürklerin ise 'Apar' diyerek küçümsediği devlet [Avarlar] dır.",
+            "Sasanilerle birleşerek İstanbul'u iki kez kuşatan tarihteki ilk Türk devleti [Avarlar] dır.",
+            "Museviliği (Yahudiliği) kabul eden tarihteki ilk ve tek Türk devleti [Hazarlar] dır.",
+            "Müslüman Araplarla (Hz. Osman dönemi [Belencer] Savaşı) savaşarak İslamiyet'in Kafkaslarda yayılmasını durduran [Hazarlar] dır.",
+            "Talas Savaşı'nda Çinlilere karşı Müslüman ordularını destekleyen Türk boyu [Karluklar] dır.",
+            "Boylar halinde İslamiyet'i kabul eden ilk Türk boyu [Karluklar] dır.",
+            "Cengiz Han (Moğol) ordusuna itaat eden ilk Müslüman Türk boyu [Karluklar] dır.",
+            "Büyük Karahanlı devletinin kuruluşunda temel teşkil eden Türk boyu [Karluklar] dır.",
+			"Eski Türklerde hükümet anlamına gelen kavram [Ayukı]'dır.",
+			"Başbakan anlamında kullanılan görevli [Aygucı] / [Üge]'dir.",
+			"Bakan anlamına gelen kavram [Buyruk]'tur.",
+			"Hazine sorumlusu olarak görev yapan kişi [Ağılığ]'dır.",
+			"Yazı işleriyle uğraşan görevli [Bitigçi]'dir.",
+			"Askeri vali anlamında kullanılan unvan [Şad] / [Tutuk]'tur.",
+			"Danışma kurulu olarak görev yapan meclis [Keneş] / [Kengeş]'tir.",
+			"Saray görevlisi veya komutan anlamında [Tarkan] / [Apa] kullanılır.",
+			"Tigin eğitmeni olarak bilinen görevli [Ataman] - [İnal] - [İnanç]'tır.",
+			"Tabip veya doktor anlamında kullanılan kavram [Otacı] / [Emçi]'dir.",
+			"Danışman anlamına gelen görevli [Kenetçi]'dir.",
+			"Vergi memuru olarak görev yapan kişiler [Tudun] / [İmga] / [Ağcı]'dır.",
+			"Prens anlamına gelen unvan [Tigin] / [Elig]'dir.",
+			"Batı kanadının yöneticisine [Yabgu] denir.",
+			"Tigin'e Büyük Selçuklularda [Melik], Osmanlılarda [Şehzade] denir.",
+			"Tigin eğitmenine Büyük Selçuklularda [Atabey], Osmanlılarda [Lala] denir.",
+			"Tigin, [Şad] olunca yönetici olur.",
+			"İstanbul'u kuşatan Türk topluluklarından biri [Peçenekler]'dir.",
+			"İstanbul'u kuşatan Türk topluluklarından biri [Avarlar]'dır.",
+			"İstanbul'u kuşatan Türk topluluklarından biri [Tuna] [Bulgarları]'dır.",
+			"Orhun Abideleri ile ilgili ilk bilgileri veren İslam müellifi [Cüveyni]'dir.",
+			"Kutluk Devleti'nin yıkılış sürecinde [Basmil], [Karluk] ve [Uygur] Türkleri birleşerek etkili olmuştur.",
+            "Kendi adına madeni para (Yarmak) bastıran ilk Türk hükümdarı [Türgişler] in lideri Baga Tarkan'dır.",
+            "Emevilerle Sulu Kağan döneminde (Haristan savaşı) savaşarak İslamiyet'in Orta Asya'da yayılmasını engelleyen [Türgişler] dir.",
+            "Uygurları yıkarak Ötüken'de devlet kuran ve Moğollara itaat eden ilk Türk devleti [Kırgızlar] dır.",
+            "Karadeniz'in kuzeyinden Avrupa'ya göçen, daha sonra İslamiyet'i kabul eden devlet İtil (Volga) [Bulgarları] dır.",
+            "Avrupa'ya göç edip Hristiyanlığı seçerek Slavlaşan (Asimile olan) grup [Tuna] Bulgarlarıdır.",
+            "Tuna Bulgarlarının tarihte ilk defa kullandıkları hükümdarlık unvanı [Çar] dır (Kurum Han veya Simon).",
+            "En kalabalık Türk boyu olan; Büyük Selçuklu ve Osmanlı Devleti'ni kuran yapı [Oğuzlar] dır.",
+            "Oğuzların Balkanlara göç edip Hristiyan olanlarına tarihte [Uzlar] adı verilir.",
+            "Malazgirt Savaşı'nda Bizans ordusunda ücretli askerken Selçuklu (Alparslan) tarafına geçenler [Uzlar] ve Peçeneklerdir.",
+            "Ruslarla yaptıkları mücadeleler meşhur İgor Destanına konu olan boy [Kıpçaklar] (Kumanlar) dır.",
+            "Tarihte devlet kuramamış, boylar halinde yaşamış ve Bizans'ta ücretli askerlik yapmış olan savaşçı boy [Peçenekler] dir.",
+            "Çaka Beyliği ile ittifak kurarak İstanbul'u kuşatmaya çalışan Türk boyu [Peçenekler] dir.",
+            "Avrupa Hunlarından sonra Avrupa'ya göçen, 'Yoldan Çıkan' anlamına gelen, günümüz Sibirya'sına ismini veren boy [Sabirler] dir.",
+            "Kafkasların ve Balkanların Germenleşmesini (veya Ruslaşmasını) engelleyen Hristiyan Türk topluluğu [Macarlar] dır.",
+            "Emevilere karşı Türgişler, Hz. Osman'a karşı Hazarlar savaşarak İslamiyet'in yayılmasını [Geciktirmişlerdir] .",
+            "Altın işlemeciliğinde ileri gittikleri için 'Bozkırın Kuyumcuları' olarak bilinen ilk Türk topluluğu [İskitler] (Sakalar)'dır.",
+            "[İskitler]in en ünlü ve efsanevi hükümdarı Alper Tunga dır.",
+            "Dünyanın bilinen ilk kadın hükümdarı olan İskit lideri [Tomris] Hatun'dur.",
+            "İskitlerde savaşçı olarak bilinen kadın savaşçılara [Amazon] adı verilmiştir.",
+            "İskitlerin günümüzdeki torunları olan ve Rusya'da yaşayan Türk boyu [Yakutlar] dır.",
+            "Mısır'da kurulan ve resmi yazışmalarda Türkiye (ed-Devletü't-Türkiyye) adını kullanan devlet [Memlükler] dir.",
+            "Eftalitler olarak da bilinen ve Göktürk-Sasani ittifakıyla yıkılan devlet [Akhunlar] dır.",
+            "Büyük Selçuklu ve Osmanlı gibi cihan devletlerinin boy kökeni olan [Kınık] ve Kayı boyları Oğuzlara aittir.",
+            "Mısır'da kurulan ilk Türk-İslam devleti olan Tolunoğulları'nın kurucuları [Oğuz] boylarındandır."
+        ];
+
+        // --- 2. HAVUZ: KÜLTÜR VE UYGARLIK ---
+        const poolKultur = [
+            "Çin kaynaklarına göre Türk adının anlamı [Miğfer] olarak geçer.",
+			"Aile = [Oguş]",
+			"Sülale = [Uruk]",
+			"Bod/ok = [Boy]",
+			"Millet = [Budun]",
+			"[Devlet] = İl/El",
+            "Divan-ı Lügat-ı Türk'ün yazarı Kaşgarlı Mahmut'a göre Türk adının anlamı [Olgunluk] çağıdır.",
+            "Ziya Gökalp'e göre Türk adının anlamı [Kanun] ve nizam sahibidir.",
+			"Asya Hunlarına ait olan [Oğuz] [Kağan] Destanı'nın baş kahramanı Mete Han ile özdeşleştirilir.",
+			"Göktürklere ait [Bozkurt] Destanı, Türklerin kurttan türeyişini anlatır.",
+			"Göktürklere ait [Ergenekon] Destanı'nda demir dağın eritilerek çıkılması anlatılır.",
+			"Uygurlara ait [Türeyiş] Destanı'nda tanrılarla evlenme motifi yer alır.",
+			"Uygurlara ait [Göç] Destanı'nda kutsal Yada Taşı'nın kaybı sonucu kuraklık yaşanır.",
+			"Kırgızlara ait en önemli destan [Manas] Destanı'dır.",
+			"İskitlere ait destanlardan biri [Alp][Er][Tunga] Destanı'dır.",
+			"İskitlere ait destanlardan biri [Şu] Destanı'dır.",
+			"Şu Destanı'nda İskit hükümdarı Şu'nun [Büyük İskender] ile mücadelesi anlatılır.",
+			"Alp Er Tunga, İranlıların Şehname destanında [Afrasyap] adıyla geçer.",
+			"Avrupa Hunlarına ait olan destan [Nibelungen] Destanı'dır.",
+			"Nibelungen Destanı'nda Atilla, [Etzel] adıyla geçer.",
+			"Ruslara ait olan destan [İgor] Destanı'dır.",
+			"İgor Destanı'nda Rusların [Kıpçaklar] ile mücadelesi anlatılır.",
+			"Kırgızlara ait olan yazıtlar [Yenisey] Yazıtları olarak adlandırılır.",
+			"I. Göktürkler dönemine ait olan yazıt [Bugut] Yazıtı'dır.",
+			"II. Göktürkler dönemine ait olan yazıtlar [Orhun] Yazıtları'dır.",
+			"Orhun Yazıtları, [Bilge Kağan], [Kültigin] ve [Tonyukuk] adına dikilmiştir.",
+			"Uygurlara ait olan [Sine] [Uşi] Yazıtı, Moyençur'un faaliyetlerini anlatır.",
+			"[Taryat] (Terhin) Yazıtı'nda 'Konar-Göçer' tabirine ilk kez rastlanır.",
+			"Uygurlara ait olan [Karabalgasun] Yazıtı'nda Maniheizm inancının özellikleri anlatılır.",
+			"Sadece [Hicri] Takvim ay yılı esaslıdır.",
+			"12 Hayvanlı, Celali, Rumi ve Miladi takvimler [Güneş] yılı esaslıdır.",
+			"12 Hayvanlı Türk Takvimi, Türklerin [astronomi] ve astroloji alanında ilerlediğini gösterir.",
+			"12 Hayvanlı Türk Takvimi'nde her [yıl] bir hayvan adıyla anılır.",
+			"12 Hayvanlı Türk Takvimi, [12] yılda bir tekrar eder.",
+			"Hicri Takvim, Hz. [Ömer] döneminde kullanılmaya başlanmıştır.",
+			"Hicri Takvim, [Ay] yılı esaslıdır.",
+			"Ay yılı ile güneş yılı arasında [11] gün fark vardır.",
+			"Celali Takvim, Büyük Selçuklu Sultanı [Melikşah] döneminde hazırlanmıştır.",
+			"Celali Takvim, [Ömer] [Hayyam] başkanlığındaki komisyon tarafından oluşturulmuştur.",
+			"Celali Takvim'in hazırlanma amacı [mali] işleri düzenlemektir.",
+			"Celali Takvim adını Melikşah'ın [Celaleddin] unvanından alır.",
+			"Rumi Takvim, Osmanlı'da [19]. yüzyıldan itibaren kullanılmaya başlanmıştır.",
+			"Rumi Takvim'in kullanılma amacı [ticari] ilişkileri düzenlemektir.",
+			"Miladi Takvim ilk kez [Mısırlılar] tarafından kullanılmıştır.",
+			"Osmanlı Devleti, 1917 yılında Miladi Takvim'e [Takvim]-i [Garbi] adıyla geçmiştir.",
+			"Hükümdarın çadırına verilen ad [Otağ]'dır.",
+			"Hükümdarın tahtına verilen ad [Örgin]'dir.",
+			"Demir çubuğa takılı, at kılından yapılan püsküllü sancak [Tuğ] olarak adlandırılır.",
+			"Hükümdarın kasketinin önündeki tüye [Kotuz] (Sorguç) denir.",
+			"Hükümdarlık sembollerinden olan davula [Kös] veya Köpürge denir.",
+			"İslami dönemde davul için kullanılan ifade [Nevbet] olarak bilinir.",
+			"Hükümdar buyruğuna [Yarlığ] denir.",
+			"Eski Türklerde halk veya topluluk anlamında kullanılan kavram [Kün]'dür.",
+			"Eski Türklerde hükümet anlamına gelen kavram [Ayuki]'dir.",
+			"Eski Türklerde sivil yönetici anlamında kullanılan kavram [Apa]'dır.",
+			"Ucu eğik bıçağa [Kama] denir.",
+			"Eski Türklerde bakan anlamında [Buyruk] kullanılır.",
+			"Eski Türklerde hekim anlamında [Otacı] [Emçi] kullanılır.",
+			"Hükümdarlık sembollerinden biri olan silah [Kılıç]'tır.",
+			"Kemer anlamına gelen hükümdarlık sembolü [Kur]'dur.",
+			"Hükümdarlık sembollerinden biri olan kamçıya [Berge] denir.",
+			"[Yay], hükümdarlık sembollerinden biridir.",
+			"[Ok], hükümdarlık sembolü değil, bağlılık göstergesidir.",
+			"[Oksızlık], bağımsızlık anlamına gelir.",
+			"Dede Korkut Hikayeleri'nde Oğuzların [Kıpçaklar] ile mücadelesi anlatılır.",
+            "Macar Türkolog Wambery'ye göre Türk adının anlamı [Türemek] kelimesinden gelir.",
+            "Eski Uygur metinlerine göre Türk adının anlamı [Güç] veya kuvvettir.",
+            "Tarihte Türk adı ilk kez [Çin] kaynaklarında geçmiştir.",
+            "Tarihte 'Türkiye' (coğrafi bölge olarak) adı ilk kez [Bizans] kaynaklarında geçmiştir.",
+            "Orta Asya'da bilinen en eski kültür merkezi [Anav] kültürüdür.",
+            "Türklerin en eski kültür merkezi olan ve Altaylar civarında gelişen kültür [Afanesyevo] kültürüdür.",
+            "Türklerin atalarının yaşadığı ve tunç eşyaların bulunduğu geniş kültüre [Andronova] denir.",
+            "Orta Asya'nın en gelişmiş ve demirin işlendiği kültür merkezi [Karasuk] bölgesidir.",
+            "Türklere ait en yeni ve günümüze en yakın olan gelişmiş kültür merkezi [Tagar] kültürüdür.",
+            "İskitlerin İranlılarla yaptığı savaşları anlatan Şehname destanının yazarı [Firdevsi] dir.",
+            "Şehname adlı eserde Alper Tunga'dan [Afrasiyab] adıyla bahsedilmiştir.",
+            "Ölen kahramanların mezar taşı olan Balbal geleneğini başlatan Türk topluluğu [İskitler] dir.",
+            "İskitlere ait olan destanlardan biri Alper Tunga, diğeri ise [Şu] destanıdır.",
+            "İslamiyet öncesinde Türklerin Orta Asya'dan göç etmesinin temel ekonomik sebebi [Otlak] ve mera yetersizliğidir.",
+            "Göçlerin siyasi sebeplerinden biri olan Çin ve [Moğol] baskısı Türkleri batıya itmiştir.",
+            "Orta Asya'dan yapılan göçler sayesinde Türk kültürü geniş bir [Coğrafyaya] yayılmıştır.",
+            "Türklerin göç etmesini kolaylaştıran en önemli unsur [Atı] evcilleştirmeleri olmuştur.",
+            "Farklı coğrafyalara göç eden Türklerin boylar halinde yaşaması [Asimile] olmalarını hızlandırmıştır.",
+            "[Mete] [Han]'ın tahta çıkış tarihi (M.Ö 209), Türk Kara Kuvvetlerinin Kuruluş yılı olarak kabul edilir.",
+            "Mete Han'ın orduda kurduğu ve günümüz modern ordularına ilham olan sisteme [Onlu] sistem denir.",
+            "Savaşlarda haberleşmek ve korku salmak için Mete Han'ın icat ettiği silah Islıklı [Oktur] .",
+            "Tarihte Vatan sevgisinden ilk defa bahseden Türk hükümdarı [Mete] Han'dır.",
+            "Oğuz Kağan destanındaki 'Oğuz Kağan' karakterinin [Mete] Han olduğu düşünülmektedir.",
+            "Almanların meşhur Nibelungen Destanı'nda Atilla'dan efsanevi lider [Etzel] adıyla bahsedilir.",
+            "Türk tarihinin ilk yazılı siyasetname örnekleri olan Orhun Abideleri [Göktürkler] döneminde dikilmiştir.",
+            "Orhun Abideleri sırasıyla Vezir Tonyukuk, Kültigin ve [Bilge] Kağan adına dikilmiştir.",
+            "Abidelerin bir tarafı Türkçe iken diğer tarafı [Çince] olarak yazılmıştır.",
+            "Orhun Abideleri'nin metinlerini taşa kazıyan ilk Türk yazarı [Yolluğ] Tigin'dir.",
+            "1893 yılında abideleri okumayı başaran Danimarkalı dilbilimci Wilhelm [Thomsen] dir.",
+            "Demir dağın eritilerek çıkışın anlatıldığı Ergenekon ve [Bozkurt] destanları Göktürklere aittir.",
+            "Maniheizm dininde et yemek yasaklandığı için Uygurlar savaşçılık özelliklerini yitirmiş ve [Tarım] a yönelmişlerdir.",
+            "Yerleşik hayata geçtikleri için şehir (Balık) kuran ve ilk [Mimari] eserleri veren devlet Uygurlardır.",
+            "Uygurlar, Çin'den matbaayı getirerek ilk hareketli Türk matbaasını ve ilk [Kütüphane] yi kurmuşlardır.",
+            "Tarihte 'Orta Oyunu' olarak da bilinen ilk Türk [Tiyatrosunu] bulan devlet Uygurlardır.",
+            "Ticarette geliştikleri için ilk defa '[Çav]' adı verilen kağıt Para kullanan Türk devleti Uygurlardır.",
+            "Uygurlara ait en meşhur sözlü edebiyat ürünleri Türeyiş ve [Göç] destanlarıdır.",
+            "Uygurlar döneminde kubbeli çadır (yurt) yapısının mimariye uyarlanmasına Türk [Üçgeni] adı verilir.",
+            "Uygurlar, maniheizm tapınaklarının duvarlarına ilk defa [Fresk] adı verilen duvar resimleri çizmişlerdir.",
+            "Üzengiyi Avrupa'ya tanıtan ve Slavları ordu teşkilatında etkileyen devlet [Avarlar] dır.",
+            "Farklı dinlere hoşgörü gösterdikleri ve davalara her dinden kadıların baktığı döneme Hazar [Barış] Çağı denmiştir.",
+            "Ordularında Türk tarihinde ilk defa 'ücretli' asker bulunduran devlet [Hazarlar] dır.",
+            "Kırgızlara ait olan ve okuması hala devam eden, dünyanın en uzun destanı [Manas] Destanı'dır.",
+            "Yenisey Kitabeleri'ni diken ve ölülerini yakma (kremasyon) geleneği olan devlet [Kırgızlar] dır.",
+            "Kıpçakların Oğuz Türkleri ile olan şiddetli mücadeleleri [Dede] Korkut hikayelerine konu olmuştur.",
+            "Kıpçaklardan günümüze miras kalan ve içinde Latince, Farsça, Türkçe bulunan sözlüğe [Codex] Cumanicus denir.",
+            "Dünyadaki ilk Türkoloji (Türk bilimi) enstitüsünü 1870'te Budapeşte'de kuranlar [Macarlar] dır.",
+            "İlk Türkolog sayılan ve Macar Türkoloji enstitüsünün temellerine katkı sağlayan alim [Vambery] dir.",
+            "Hükümdara devleti yönetme yetkisinin ve ilahi gücün Gök Tanrı tarafından verildiğine inanılan anlayışa [Kut] inancı denir.",
+            "Kut inancına göre hanedanın tüm erkek üyelerinin tahtta hak sahibi olması sık sık [Taht] kavgalarına neden olmuştur.",
+            "Hükümdarlara verilen en yaygın unvanlar Han, Hakan ve [Kağan] dır.",
+            "Devlet işlerinin görüşülüp karara bağlandığı siyasi ve askeri meclise (Toy / Kengeş) [Kurultay] adı verilir.",
+            "Kurultaya katılma hakkı olan boy beylerine, komutanlara ve ileri gelenlere [Toygun] denir.",
+            "Hükümdarın eşine verilen unvan olan ve kurultayda oy hakkı bulunan kişiye [Hatun] (Katun) denir.",
+            "Prenslerin (Tiginlerin) devlet yönetimi ve askeri eğitiminden sorumlu olan hocalara [Ataman] (İnal/İnanç) denir.",
+            "Devleti oluşturan unsurlar İl (Devlet), Oksızlık (Bağımsızlık), Kül (Halk) ve hukuku temsil eden [Töre] dir.",
+            "Eski Türklerde yazılı olmayan, ancak Hakan dahil herkesin kesinlikle uymak zorunda olduğu hukuk kurallarına [Töre] denir.",
+            "Törenin değişmez 4 kuralı: Adalet (Könilik), Eşitlik (Tüzlük), İyilik (Uzluk) ve İnsanlıktır ([Kişilik] ).",
+            "Eski Türk devletlerinde mahkeme başkanlarına ve yüksek hakimlere [Yargucu] denir.",
+            "Ahiret inancının en büyük göstergesi olan ve ölülerin değerli eşyalarıyla gömüldüğü oda şeklindeki mezarlara [Kurgan] adı verilir.",
+            "Mezarın başına, savaşçının hayattayken öldürdüğü düşman sayısınca dikilen küçük heykellere/taşlara [Balbal] denir.",
+            "Gök Tanrı inancına sahip eski Türklerde cennete [Uçmağ] , cehenneme ise [Tamu] denirdi.",
+            "Ölen kişinin çadırı etrafında dönülerek yapılan cenaze törenlerine [Yuğ] töreni denir.",
+            "Yuğ törenlerinde yakılan ağıtlara ve söylenen acıklı şiirlere [Sagu] adı verilir.",
+            "İslamiyet öncesi Türklerde en yaygın olan inanç sistemi [Gök] Tanrı inancıdır.",
+            "Eski Türk inancında büyü, ayin ve şifa ritüellerini gerçekleştiren din adamlarına Kam veya [Baksı] adı verilir.",
+            "İslamiyet öncesi din adamlarının ayrıcalıklı bir sınıf oluşturamamasının sebebi toplumda ruhban [Sınıfı] nın olmamasıdır.",
+            "Göçebe yaşam tarzından dolayı Türklerde verilen hapis cezaları [Kısa] sürelidir (Uygurlar hariç).",
+            "Savaşlarda düşmanı yanıltmak için geri çekilir gibi yapılan taktiğe Hilal veya [Turan] Taktiği (Sahte Ricat) denir.",
+            "Savaş öncesi düşman durumunu ve araziyi öğrenmek için önden gönderilen keşif birliğine [Yelme] denir.",
+            "Toplumun sosyal yapısındaki en küçük birim olan aileye (çekirdek aile) [Oguş] denir.",
+            "Ailelerin (Oguş) birleşmesiyle Sülale (Urug), Urugların birleşmesiyle Boy (Ok), Boyların birleşmesiyle Millet yani [Budun] oluşur.",
+            "Halk ile yöneticiler (Hakan) arasında yapılan karşılıklı görev sözleşmesine [Tüz] denir.",
+            "İlkbaharda doğanın canlanışı şerefine kutlanan ve Ergenekon'dan çıkışı simgeleyen bayrama [Nevruz] denir.",
+            "Eski Türklerde sözlü edebiyat ürünlerinden olan atasözlerine [Sav] denir.",
+            "Şölenlerde (Sığır) kopuz eşliğinde söylenen ve kahramanlık ile doğayı anlatan şiirlere [Koşuk] denir.",
+            "Türk tarihinin ilk yazılı belgeleri olan Orhun Abideleri, [Göktürk] alfabesiyle yazılmıştır.",
+            "Orhun Abidelerinden daha eski olduğu düşünülen ancak okunamayan Yenisey Kitabeleri [Kırgızlar] a aittir.",
+            "Türklerin kendilerine ait olan ve oluşturdukları iki milli alfabe: Göktürk ve [Uygur] alfabeleridir.",
+            "Orta Asya'da Çin ile Türkler arasında mücadelesi yapılan en önemli ticaret yolu [İpek] Yolu'dur.",
+            "Kuzeyde Hazar ve İdil Bulgarlarının zenginleşmesini sağlayan ticaret yolu [Kürk] Yolu'dur.",
+			"İslamiyet öncesi Türklerin ilk ve milli alfabesi [Göktürk] alfabesidir.",
+			"Orhun Yazıtları [Göktürk] alfabesi ile yazılmıştır.",
+			"Uygurlar tarafından kullanılan alfabe [Uygur] alfabesidir.",
+			"Uygur alfabesi, Soğd kökenli bir [alfabe]dir.",
+			"Türklerin İslamiyet öncesinde kullandığı alfabelerden biri de [Soğd] alfabesidir.",
+			"Türklerin kullandığı en eski yazılı alfabe olarak [Göktürk] (Orhun) alfabesi kabul edilir.",
+			"İpek Yolu'nda mal taşımada kullanılan çift hörgüçlü deve [Bakterian] [Devesi]'dir.",
+			"Uygurlar döneminde kullanılan yazı sistemi [Uygur] yazısıdır.",
+			"Türklerin Maniheizm ve Budizm etkisiyle kullandığı alfabe [Uygur] alfabesidir.",
+            "Hükümet (Bakanlar Kurulu / Ayuki) içindeki bakanlara (nazır) [Buyruk] denir.",
+            "Hükümetteki vezirlere ve ayuki başkanına (Başbakan) Aygucı veya [Üge] denirdi.",
+            "Hükümdarlık sembollerinden olan hükümdar çadırına [Otağ] denir.",
+            "Hükümdarlık sembollerinden olan ve savaşlarda, törenlerde çalınan büyük davula [Nevbet] denir.",
+            "Hükümdarlık sembollerinden olan at veya yak kuyruğundan yapılan mızrak sancağına [Tuğ] denir.",
+            "Devlet hazinesinden sorumlu olan yüksek düzeyli görevliye [Ağılığ] denir.",
+            "Eyaletlere gönderilen vergi tahsildarlarına ve valilere [Tudun] veya İlteber denir.",
+            "Devletin iç ve dış tüm resmi yazışmalarından sorumlu olan kişiye Bitikçi veya [Tamgacı] denir.",
+            "Minyatür sanatını bulan ve cildiye (kitap ciltleme) sanatını başlatan devlet [Uygurlar] dır.",
+            "Asya Hunlarına ait olduğu düşünülen ve dünyanın en eski halısı olan halı [Pazırık] Halısıdır.",
+            "Altın Elbiseli Adam zırhı Kazakistan'daki [Esik] Kurganı'ndan çıkarılmıştır.",
+            "Uygurlar döneminde din adamı sınıfı oluşmuş ve tapınaklara [Stupa] adı verilmiştir."
+        ];
+
+        let quizData = [];
+        let totalQuestionsCount = 0;
+        let currentTabId = 0;
+        
+        let timerInterval;
+        let secondsElapsed = 0;
+        let isTimerRunning = false;
+
+        // --- Core Utils ---
+
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function levenshtein(a, b) {
+            if (a.length === 0) return b.length;
+            if (b.length === 0) return a.length;
+            let matrix = [];
+            for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+            for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1, 
+                            Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+                        );
+                    }
+                }
+            }
+            return matrix[b.length][a.length];
+        }
+
+        function normalizeString(str) {
+            let s = str.toLocaleLowerCase('tr-TR').replace(/[-'\s]/g, '');
+            return s.replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+                    .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+                    .replace(/î/g, 'i').replace(/â/g, 'a');
+        }
+
+        function formatTime(totalSeconds) {
+            const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const s = (totalSeconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        // --- Visual Box Updating ---
+        window.updateVisualBoxes = function(input) {
+            const container = input.nextElementSibling; 
+            const boxes = container.children;
+            const val = input.value;
+            
+            for(let i=0; i < boxes.length; i++) {
+                if(boxes[i].classList.contains('letter-box')) {
+                    boxes[i].innerText = val[i] || '';
+                    if (val[i] && val[i] !== ' ' && val[i] !== '-') {
+                        boxes[i].classList.add('pop-letter');
+                        setTimeout(() => boxes[i].classList.remove('pop-letter'), 200);
+                    }
+                }
+            }
+        };
+
+        function spawnFloatingScore(element) {
+            const floater = document.createElement('div');
+            floater.innerText = "⭐ Harika!";
+            floater.className = "absolute text-teal-600 font-black text-sm pointer-events-none animate-float-up z-50 drop-shadow-md whitespace-nowrap font-title";
+            
+            const rect = element.getBoundingClientRect();
+            floater.style.left = `${rect.left + window.scrollX + rect.width / 2 - 30}px`;
+            floater.style.top = `${rect.top + window.scrollY - 10}px`;
+            
+            document.body.appendChild(floater);
+            setTimeout(() => floater.remove(), 1000);
+        }
+
+        // --- Timer & Storage (Session Based) ---
+
+        function startTimer() {
+            if (!isTimerRunning) {
+                isTimerRunning = true;
+                timerInterval = setInterval(() => {
+                    secondsElapsed++;
+                    document.getElementById('timer-display').innerText = formatTime(secondsElapsed);
+                }, 1000);
+            }
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+        }
+
+        function resetTimer() {
+            stopTimer();
+            secondsElapsed = 0;
+            document.getElementById('timer-display').innerText = "00:00";
+        }
+
+        function saveSession() {
+            const inputs = document.querySelectorAll('.hidden-puzzle-input');
+            const answers = {};
+            inputs.forEach(input => {
+                if(input.value.trim() !== '') {
+                    const qItem = input.closest('.question-item');
+                    if(qItem) {
+                        const qId = qItem.getAttribute('data-original');
+                        answers[qId] = input.value;
+                    }
+                }
+            });
+
+            const sessionData = {
+                quizData: quizData,
+                answers: answers,
+                currentTabId: currentTabId
+            };
+            localStorage.setItem('islamiyetOncesiSonsuzSession', JSON.stringify(sessionData));
+            updateProgressBar();
+        }
+
+        function updateProgressBar() {
+            if (currentTabId === 'mistakes') return;
+            const inputs = document.querySelectorAll('#section-' + currentTabId + ' .hidden-puzzle-input');
+            if(inputs.length === 0) return;
+
+            let filled = 0;
+            inputs.forEach(inp => { if(inp.value.trim() !== '') filled++; });
+            const percentage = (filled / inputs.length) * 100;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+        }
+
+        window.useHint = function(btnElement, correctAnswer) {
+            startTimer();
+            const container = btnElement.previousElementSibling;
+            const inputElement = container.querySelector('.hidden-puzzle-input');
+            let currentVal = inputElement.value;
+            let currentLen = currentVal.length;
+            
+            if(currentLen >= correctAnswer.length || container.classList.contains('correct')) return;
+            
+            inputElement.value = correctAnswer.substring(0, currentLen + 1);
+            updateVisualBoxes(inputElement);
+            container.classList.add('hinted'); 
+            
+            btnElement.style.transform = 'scale(1.3)';
+            setTimeout(() => { btnElement.style.transform = 'scale(1)'; }, 200);
+            
+            saveSession();
+        }
+
+        // --- Generation & Tabs ---
+
+        function generateNewSession(askConfirm = false) {
+            if(askConfirm && !confirm("Oyun baştan başlıyor, yepyeni rastgele sorular gelecek. İlerlemen silinecek. Emin misin?")) return;
+            
+            localStorage.removeItem('islamiyetOncesiSonsuzSession');
+            
+            const selectedDevletler = shuffleArray([...poolDevletler]).slice(0, 20);
+            const selectedKultur = shuffleArray([...poolKultur]).slice(0, 20);
+
+            quizData = [
+                {
+                    section: "Türk Devletleri (Siyasi Tarih)",
+                    icon: "🛡️",
+                    questions: selectedDevletler
+                },
+                {
+                    section: "Kültür ve Uygarlık",
+                    icon: "⚖️",
+                    questions: selectedKultur
+                }
+            ];
+
+            resetTimer();
+            buildUI();
+            saveSession();
+            switchTab(0);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function loadSession() {
+            const saved = JSON.parse(localStorage.getItem('islamiyetOncesiSonsuzSession'));
+            if (saved && saved.quizData && saved.quizData.length > 0) {
+                quizData = saved.quizData;
+                buildUI();
+                
+                // Restore answers
+                const inputs = document.querySelectorAll('.hidden-puzzle-input');
+                inputs.forEach(input => {
+                    const qItem = input.closest('.question-item');
+                    if(qItem) {
+                        const qId = qItem.getAttribute('data-original');
+                        if(saved.answers && saved.answers[qId]) {
+                            input.value = saved.answers[qId];
+                            updateVisualBoxes(input);
+                        }
+                    }
+                });
+                updateProgressBar();
+                if(saved.answers && Object.keys(saved.answers).length > 0) startTimer();
+                
+                if(saved.currentTabId !== undefined && saved.currentTabId !== 'mistakes') {
+                    switchTab(saved.currentTabId);
+                } else {
+                    switchTab(0);
+                }
+            } else {
+                generateNewSession();
+            }
+        }
+
+        function switchTab(id) {
+            currentTabId = id;
+            const isMistakes = (id === 'mistakes');
+
+            document.querySelectorAll('.section-container').forEach(el => {
+                const sectionIdStr = el.id.replace('section-', '');
+                if(sectionIdStr == id) {
+                    el.classList.remove('hidden');
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(10px)';
+                    setTimeout(() => {
+                        el.style.transition = 'all 0.4s ease';
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                    }, 50);
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+            
+            document.querySelectorAll('[id^="tab-btn-"]').forEach(btn => {
+                const btnIdStr = btn.id.replace('tab-btn-', '');
+                if(btnIdStr == id) {
+                    if (id === 'mistakes') {
+                        btn.className = "px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl text-sm sm:text-base font-bold text-white bg-gradient-to-r from-orange-500 to-amber-500 shadow-[0_4px_15px_rgba(245,158,11,0.4)] transition-all whitespace-nowrap transform scale-105 z-10 font-title border-2 border-white/20";
+                    } else {
+                        btn.className = "px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl text-sm sm:text-base font-bold text-white bg-gradient-to-r from-teal-500 to-cyan-700 shadow-[0_4px_15px_rgba(20,184,166,0.4)] transition-all whitespace-nowrap transform scale-105 z-10 font-title border-2 border-white/20";
+                    }
+                } else {
+                    btn.className = "px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl text-sm sm:text-base font-bold text-slate-600 bg-white/90 hover:bg-white hover:text-slate-900 transition-all whitespace-nowrap cursor-pointer border-2 border-transparent shadow-sm backdrop-blur";
+                }
+            });
+
+            document.getElementById('score-wrapper').style.display = isMistakes ? 'none' : '';
+            document.getElementById('btn-check').style.display = isMistakes ? 'none' : '';
+            document.getElementById('btn-show').style.display = isMistakes ? 'none' : '';
+            document.getElementById('btn-reset').style.display = isMistakes ? 'none' : '';
+
+            if (!isMistakes) {
+                const inputsInTab = document.querySelectorAll('#section-' + id + ' .hidden-puzzle-input');
+                document.getElementById('total-display').innerText = inputsInTab.length;
+                document.getElementById('score-display').innerText = "0"; 
+                updateProgressBar();
+                saveSession(); // Update tab state
+            } else {
+                document.getElementById('progress-bar').style.width = `100%`;
+            }
+        }
+
+        function buildUI() {
+            const tabsContainer = document.getElementById('tabs-container');
+            const container = document.getElementById('quiz-container');
+            tabsContainer.innerHTML = '';
+            container.innerHTML = '';
+            totalQuestionsCount = 0;
+            removeMistakesTab();
+
+            quizData.forEach((sectionData, sectionIndex) => {
+                const tabBtn = document.createElement('button');
+                tabBtn.id = `tab-btn-${sectionIndex}`;
+                tabBtn.innerHTML = `${sectionData.icon} ${sectionData.section}`;
+                tabBtn.onclick = () => switchTab(sectionIndex);
+                tabsContainer.appendChild(tabBtn);
+
+                const sectionDiv = document.createElement('div');
+                sectionDiv.id = `section-${sectionIndex}`;
+                sectionDiv.className = `section-container bg-white/95 backdrop-blur-2xl p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_10px_30px_rgba(0,0,0,0.12)] border border-white/80 mx-1 sm:mx-0 hidden`;
+                
+                const sectionTitle = document.createElement('h2');
+                sectionTitle.className = 'text-xl sm:text-3xl font-black text-slate-800 mb-6 sm:mb-8 pb-3 sm:pb-4 border-b-2 border-slate-200/50 flex items-center gap-2 sm:gap-3 font-title';
+                sectionTitle.innerHTML = `<span class="bg-teal-50 p-2 rounded-lg sm:rounded-xl shadow-sm text-xl sm:text-2xl border border-teal-100">${sectionData.icon}</span> ${sectionData.section}`;
+                sectionDiv.appendChild(sectionTitle);
+
+                const questionsList = document.createElement('div');
+                questionsList.className = 'space-y-4 sm:space-y-6';
+
+                sectionData.questions.forEach((qStr, qIndex) => {
+                    const qId = qIndex + 1;
+                    
+                    const questionItem = document.createElement('div');
+                    questionItem.className = 'flex items-start gap-3 sm:gap-4 p-4 sm:p-5 rounded-xl sm:rounded-2xl question-card question-item relative';
+                    questionItem.setAttribute('data-original', qStr); 
+                    
+                    const numBadge = document.createElement('span');
+                    numBadge.className = 'flex-shrink-0 bg-gradient-to-br from-teal-500 to-cyan-700 text-white font-black rounded-lg sm:rounded-xl w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-xs sm:text-sm shadow-[0_4px_10px_rgba(20,184,166,0.3)] mt-1 font-title';
+                    numBadge.innerText = qId;
+                    
+                    const qTextContainer = document.createElement('div');
+                    qTextContainer.className = 'text-[15px] sm:text-lg leading-relaxed sm:leading-loose w-full text-slate-800 font-medium break-words';
+
+                    let formattedHTML = qStr.replace(/\[(.*?)\]/g, (match, answer) => {
+                        const boxesHTML = Array.from({length: answer.length}).map(() => 
+                            `<span class="letter-box flex items-center justify-center w-[22px] h-[30px] sm:w-8 sm:h-10 border sm:border-2 border-slate-300 rounded-[4px] sm:rounded-md bg-white text-teal-700 font-bold text-sm sm:text-xl uppercase"></span>`
+                        ).join('');
+
+                        return `<span class="inline-flex items-center gap-1 sm:gap-2 mx-1 align-middle whitespace-nowrap">
+                                    <span class="relative inline-flex flex-wrap sm:flex-nowrap puzzle-container" data-answer="${answer}">
+                                        <input type="text" data-answer="${answer}" class="hidden-puzzle-input text-[16px] md:text-lg absolute inset-0 w-full h-full opacity-0 z-20 cursor-text" 
+                                               maxlength="${answer.length}"
+                                               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" 
+                                               oninput="updateVisualBoxes(this); startTimer(); saveSession();"
+                                               onfocus="this.classList.add('is-focused'); this.parentElement.classList.add('is-focused')"
+                                               onblur="this.classList.remove('is-focused'); this.parentElement.classList.remove('is-focused')">
+                                        <span class="flex flex-wrap sm:flex-nowrap gap-[2px] sm:gap-1 visual-box-container pointer-events-none">
+                                            ${boxesHTML}
+                                        </span>
+                                    </span>
+                                    <button onclick="useHint(this, '${answer}')" class="text-slate-300 hover:text-amber-500 transition-all flex items-center justify-center hover:scale-110 active:scale-95" title="İpucu Al">
+                                        💡
+                                    </button>
+                                </span>`;
+                    });
+
+                    qTextContainer.innerHTML = formattedHTML;
+                    questionItem.appendChild(numBadge);
+                    questionItem.appendChild(qTextContainer);
+                    questionsList.appendChild(questionItem);
+                });
+
+                sectionDiv.appendChild(questionsList);
+                container.appendChild(sectionDiv);
+            });
+        }
+
+        // --- Result Modals ---
+
+        function showModal(title, message, scoreStr, isPerfect = false) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+            document.getElementById('modal-score').innerText = scoreStr;
+            document.getElementById('modal-time').innerText = formatTime(secondsElapsed);
+            
+            const icon = document.getElementById('modal-icon');
+            if(isPerfect) {
+                icon.innerText = "🏆";
+                icon.className = "text-5xl sm:text-6xl mb-2 mt-2 sm:mt-4 drop-shadow-xl bg-gradient-to-br from-yellow-100 to-amber-100 w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full flex items-center justify-center border-4 border-amber-300 animate-bounce";
+                confetti({ particleCount: 200, spread: 90, origin: { y: 0.5 }, colors: ['#0d9488', '#0891b2', '#fbbf24', '#f59e0b'] });
+            } else {
+                icon.innerText = "📉";
+                icon.className = "text-5xl sm:text-6xl mb-2 mt-2 sm:mt-4 drop-shadow-xl bg-white w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full flex items-center justify-center border-4 border-slate-200";
+            }
+
+            document.getElementById('result-modal').classList.add('active');
+            stopTimer(); 
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').classList.remove('active');
+        }
+
+        // --- Core Checking Logic ---
+
+        function checkAnswers() {
+            if (currentTabId === 'mistakes') return; 
+
+            let score = 0;
+            let wrongQuestions = new Set(); 
+            const inputs = document.querySelectorAll('#section-' + currentTabId + ' .hidden-puzzle-input');
+            const totalInputs = inputs.length;
+
+            inputs.forEach(input => {
+                const container = input.closest('.puzzle-container');
+                const wasCorrectBefore = container.classList.contains('correct');
+                container.classList.remove('correct', 'incorrect', 'revealed', 'hinted');
+                
+                const userAnswerRaw = input.value.trim();
+                const correctAnswerRaw = input.getAttribute('data-answer');
+                const qItem = input.closest('.question-item');
+                const originalQuestionStr = qItem.getAttribute('data-original');
+
+                if (userAnswerRaw === '') {
+                    wrongQuestions.add(originalQuestionStr);
+                    return;
+                }
+
+                const userAnswer = normalizeString(userAnswerRaw);
+                const correctAnswer = normalizeString(correctAnswerRaw);
+                const dist = levenshtein(userAnswer, correctAnswer);
+                const allowedMistakes = correctAnswer.length <= 3 ? 0 : (correctAnswer.length <= 7 ? 1 : 2);
+
+                if (dist <= allowedMistakes) {
+                    container.classList.add('correct');
+                    if(dist > 0) {
+                        input.value = correctAnswerRaw; 
+                        updateVisualBoxes(input);
+                    }
+                    score++;
+                    if(!wasCorrectBefore) {
+                        spawnFloatingScore(container);
+                    }
+                } else {
+                    container.classList.add('incorrect');
+                    wrongQuestions.add(originalQuestionStr); 
+                }
+            });
+
+            document.getElementById('score-display').innerText = score;
+            const scoreString = `${score}/${totalInputs}`;
+
+            if (wrongQuestions.size > 0) {
+                showModal("Neredeyse!", `Bu bölümde ${wrongQuestions.size} hata veya boş var. Kurtarma modunda düzeltebilirsin!`, scoreString, false);
+                buildMistakesTab(Array.from(wrongQuestions));
+                document.querySelector('#result-modal button').onclick = () => {
+                    closeModal();
+                    switchTab('mistakes');
+                    document.querySelector('#result-modal button').onclick = closeModal;
+                };
+            } else {
+                removeMistakesTab();
+                showModal("Mükemmel!", "Harika iş çıkardın. Bu bölümü efsanevi bir şekilde tamamladın!", scoreString, true);
+            }
+        }
+
+        // --- Practice (Mistakes) Mode ---
+
+        function buildMistakesTab(questionsArray) {
+            let tabsContainer = document.getElementById('tabs-container');
+            let quizContainer = document.getElementById('quiz-container');
+
+            let tabBtn = document.getElementById('tab-btn-mistakes');
+            if (!tabBtn) {
+                tabBtn = document.createElement('button');
+                tabBtn.id = 'tab-btn-mistakes';
+                tabBtn.onclick = () => switchTab('mistakes');
+                tabsContainer.appendChild(tabBtn);
+            }
+            tabBtn.innerHTML = `🔥 Kurtarma Modu <span class="bg-white/30 text-white font-black text-xs px-2 py-1 rounded-full ml-1">${questionsArray.length}</span>`;
+
+            let sectionDiv = document.getElementById('section-mistakes');
+            if (!sectionDiv) {
+                sectionDiv = document.createElement('div');
+                sectionDiv.id = 'section-mistakes';
+                sectionDiv.className = 'section-container bg-gradient-to-br from-amber-50 to-orange-100/90 backdrop-blur-2xl p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_10px_30px_rgba(0,0,0,0.12)] border-2 sm:border-4 border-amber-200 hidden mx-1 sm:mx-0';
+                
+                const title = document.createElement('h2');
+                title.className = 'text-xl sm:text-3xl font-black text-amber-900 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b-2 border-amber-200/50 flex items-center gap-2 sm:gap-3 font-title';
+                title.innerHTML = `🛠️ Hataları Düzelt`;
+                
+                const subtitle = document.createElement('p');
+                subtitle.className = 'text-xs sm:text-sm text-amber-800 mb-6 sm:mb-8 bg-amber-100/80 backdrop-blur p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-amber-200 font-medium leading-relaxed';
+                subtitle.innerHTML = 'Hatalı veya boş sorular burada listelendi. Doğru cevaba ulaşana kadar yazmaya devam et. <b class="block mt-1">Yazarken anında kontrol edilecek!</b>';
+
+                sectionDiv.appendChild(title);
+                sectionDiv.appendChild(subtitle);
+                
+                const questionsList = document.createElement('div');
+                questionsList.id = 'mistakes-list';
+                questionsList.className = 'space-y-4 sm:space-y-5';
+                sectionDiv.appendChild(questionsList);
+
+                quizContainer.appendChild(sectionDiv);
+            }
+
+            const questionsList = document.getElementById('mistakes-list');
+            questionsList.innerHTML = ''; 
+            sectionDiv.classList.remove('completed-celebration'); 
+
+            questionsArray.forEach((qStr, index) => {
+                const questionItem = document.createElement('div');
+                questionItem.className = 'flex items-start gap-3 sm:gap-4 p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-white/80 hover:bg-white transition-colors border border-amber-200 shadow-sm question-item relative';
+                
+                const numBadge = document.createElement('span');
+                numBadge.className = 'flex-shrink-0 bg-gradient-to-br from-amber-400 to-orange-500 text-white font-black rounded-lg sm:rounded-xl w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-xs sm:text-sm shadow-[0_4px_10px_rgba(245,158,11,0.3)] mt-1 font-title';
+                numBadge.innerText = index + 1;
+                
+                const qTextContainer = document.createElement('div');
+                qTextContainer.className = 'text-[15px] sm:text-lg leading-relaxed sm:leading-loose w-full text-slate-800 font-medium break-words';
+
+                let formattedHTML = qStr.replace(/\[(.*?)\]/g, (match, answer) => {
+                    const boxesHTML = Array.from({length: answer.length}).map(() => 
+                        `<span class="letter-box flex items-center justify-center w-[22px] h-[30px] sm:w-8 sm:h-10 border sm:border-2 border-amber-300 rounded-[4px] sm:rounded-md bg-white text-slate-800 font-bold text-sm sm:text-xl uppercase"></span>`
+                    ).join('');
+
+                    return `<span class="inline-flex items-center gap-1 sm:gap-2 mx-1 align-middle whitespace-nowrap">
+                                <span class="relative inline-flex flex-wrap sm:flex-nowrap puzzle-container" data-answer="${answer}">
+                                    <input type="text" data-answer="${answer}" class="hidden-puzzle-input practice-input text-[16px] md:text-lg absolute inset-0 w-full h-full opacity-0 z-20 cursor-text" 
+                                           maxlength="${answer.length}"
+                                           oninput="updateVisualBoxes(this);"
+                                           onkeyup="handlePracticeInput(this, 'keyup')" 
+                                           onblur="this.parentElement.classList.remove('is-focused'); handlePracticeInput(this, 'blur')"
+                                           onfocus="this.parentElement.classList.add('is-focused')"
+                                           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                                    <span class="flex flex-wrap sm:flex-nowrap gap-[2px] sm:gap-1 visual-box-container pointer-events-none">
+                                        ${boxesHTML}
+                                    </span>
+                                </span>
+                            </span>`;
+                });
+
+                qTextContainer.innerHTML = formattedHTML;
+                questionItem.appendChild(numBadge);
+                questionItem.appendChild(qTextContainer);
+                questionsList.appendChild(questionItem);
+            });
+        }
+
+        function handlePracticeInput(input, eventType) {
+            const container = input.closest('.puzzle-container');
+            const wasCorrectBefore = container.classList.contains('correct');
+            container.classList.remove('incorrect', 'revealed', 'hinted');
+            
+            const userAnswerRaw = input.value.trim();
+            const correctAnswerRaw = input.getAttribute('data-answer');
+
+            if (userAnswerRaw === '') {
+                container.classList.remove('correct');
+                return;
+            }
+
+            const dist = levenshtein(normalizeString(userAnswerRaw), normalizeString(correctAnswerRaw));
+            const allowedMistakes = correctAnswerRaw.length <= 3 ? 0 : (correctAnswerRaw.length <= 7 ? 1 : 2);
+
+            if (dist <= allowedMistakes) {
+                container.classList.add('correct');
+                input.value = correctAnswerRaw;
+                updateVisualBoxes(input);
+                input.disabled = true; 
+                
+                if(!wasCorrectBefore) spawnFloatingScore(container);
+                checkAllPracticeDone(); 
+            } else {
+                container.classList.remove('correct');
+                if (eventType === 'blur') container.classList.add('incorrect');
+            }
+        }
+
+        function checkAllPracticeDone() {
+            const practiceSection = document.getElementById('section-mistakes');
+            if(!practiceSection) return;
+            
+            const allInputs = practiceSection.querySelectorAll('.practice-input');
+            const allCorrect = Array.from(allInputs).every(inp => {
+                return inp.closest('.puzzle-container').classList.contains('correct');
+            });
+            
+            if(allInputs.length > 0 && allCorrect) {
+                if(!practiceSection.classList.contains('completed-celebration')) {
+                    practiceSection.classList.add('completed-celebration');
+                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.7 }, colors: ['#0d9488', '#f59e0b', '#10b981'] });
+                    setTimeout(() => alert("Tebrikler! Öğrenme modunu başarıyla bitirdin ve tüm hatalarını telafi ettin! 🔥🎉"), 600);
+                }
+            }
+        }
+
+        function removeMistakesTab() {
+            const mistakesBtn = document.getElementById('tab-btn-mistakes');
+            const mistakesSec = document.getElementById('section-mistakes');
+            if (mistakesBtn) mistakesBtn.remove();
+            if (mistakesSec) mistakesSec.remove();
+        }
+
+        // --- Controls ---
+
+        function showAnswers() {
+            if(currentTabId === 'mistakes') return;
+            
+            if(confirm("Tüm cevapları görüp bu bölümü pas geçmek istediğine emin misin? (Puan kazanılmaz)")) {
+                const inputs = document.querySelectorAll('#section-' + currentTabId + ' .hidden-puzzle-input');
+                inputs.forEach(input => {
+                    const container = input.closest('.puzzle-container');
+                    input.value = input.getAttribute('data-answer');
+                    updateVisualBoxes(input);
+                    container.classList.remove('correct', 'incorrect', 'hinted');
+                    container.classList.add('revealed', 'correct');
+                    input.disabled = true;
+                });
+                saveSession();
+                stopTimer();
+            }
+        }
+
+        window.onload = loadSession;
+
+    </script>
+</body>
+</html>
