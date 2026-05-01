@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M. Kemal, Trablusgarp, Balkan ve I. Dünya Savaşı - 200 Soruluk Havuz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(-45deg, #f0fdf4, #e0f2fe, #fef3c7, #fae8ff);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            scroll-behavior: smooth;
+        }
+        
+        h1, h2, .font-title {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #progress-bar { transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        .letter-box {
+            font-family: 'JetBrains Mono', monospace;
+            box-shadow: 0 2px 0 #cbd5e1;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .puzzle-container.is-focused .letter-box {
+            border-color: #0d9488;
+            box-shadow: 0 3px 0 #0d9488;
+            transform: translateY(-2px);
+        }
+
+        .puzzle-container.correct .letter-box {
+            border-color: #10b981 !important;
+            background-color: #ecfdf5 !important;
+            color: #047857 !important;
+            box-shadow: 0 3px 0 #059669 !important;
+        }
+        
+        .puzzle-container.hinted .letter-box {
+            border-color: #f59e0b !important;
+            background-color: #fffbeb !important;
+            color: #b45309 !important;
+            box-shadow: 0 3px 0 #d97706 !important;
+        }
+
+        .puzzle-container.incorrect .letter-box {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+            color: #b91c1c !important;
+            box-shadow: 0 3px 0 #dc2626 !important;
+        }
+
+        .pop-letter {
+            animation: popLetter 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popLetter {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); color: #0d9488; }
+            100% { transform: scale(1); }
+        }
+
+        .puzzle-container.incorrect {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        .puzzle-container.correct {
+            animation: bounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.9) translateY(0); opacity: 0.5; }
+            50% { transform: scale(1.05) translateY(-4px); opacity: 1; }
+            100% { transform: scale(1) translateY(0); }
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(3px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+            40%, 60% { transform: translate3d(5px, 0, 0); }
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(0.8); }
+            50% { transform: translateY(-20px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-40px) scale(1); }
+        }
+        .animate-float-up {
+            animation: floatUp 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .question-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            transition: all 0.3s ease;
+        }
+        .question-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(13, 148, 136, 0.1);
+            border-color: rgba(13, 148, 136, 0.3);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; border: 2px solid transparent; background-clip: padding-box; }
+        ::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+
+        .modal-overlay {
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            transform: scale(0.8) translateY(20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="text-stone-800 pb-24">
+
+    <!-- Top Progress Bar -->
+    <div class="fixed top-0 left-0 w-full h-2 bg-stone-200/50 backdrop-blur z-[60]">
+        <div id="progress-bar" class="h-full bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 w-0 rounded-r-full shadow-[0_0_10px_rgba(13,148,136,0.5)]"></div>
+    </div>
+
+    <!-- HUD / Controls Header -->
+    <div class="sticky top-2 z-50 px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto bg-white/80 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white rounded-3xl p-3 sm:p-4 flex flex-col lg:flex-row justify-between items-center gap-4 transition-all hover:bg-white/95">
+            <div class="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-start">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-xl shadow-lg shadow-teal-200 rotate-3 font-title">
+                        🎖️
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-extrabold text-slate-800 font-title tracking-wide">
+                            M. Kemal, Savaşlar ve Antlaşmalar
+                        </h1>
+                        <p class="text-[11px] text-teal-600 font-bold tracking-widest uppercase">200 Soruluk Kapsamlı Havuz</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-2xl shadow-inner font-mono text-sm sm:text-base font-bold border-2 border-slate-700">
+                    ⏳ <span id="timer-display" class="tracking-wider text-emerald-400">00:00</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 sm:gap-3 w-full lg:w-auto overflow-x-auto pb-1 lg:pb-0 hide-scrollbar">
+                <button onclick="shuffleAndDeal()" class="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white px-4 py-2 rounded-2xl font-bold transition-all shadow-[0_4px_0_rgb(67,56,202)] active:shadow-[0_0px_0_rgb(67,56,202)] active:translate-y-1 min-w-max text-sm flex items-center gap-1">
+                    <i class="fas fa-sync-alt"></i> Havuzu Karıştır
+                </button>
+                <div id="score-wrapper" class="bg-gradient-to-r from-amber-100 to-orange-100 px-4 py-2 rounded-2xl font-black text-sm sm:text-base text-amber-800 min-w-max border-2 border-amber-200 flex items-center gap-2 shadow-sm">
+                    🏆 <span id="score-display" class="text-orange-600 text-lg">0</span> / <span id="total-display">50</span>
+                </div>
+                <button id="btn-check" onclick="checkAnswers()" class="bg-gradient-to-b from-teal-500 to-teal-700 hover:from-teal-600 hover:to-teal-800 text-white px-4 sm:px-6 py-2 rounded-2xl font-bold transition-all shadow-[0_4px_0_rgb(15,118,110)] active:shadow-[0_0px_0_rgb(15,118,110)] active:translate-y-1 min-w-max flex items-center gap-2">
+                    ✨ Kontrol Et
+                </button>
+                <button id="btn-show" onclick="showAnswers()" class="bg-gradient-to-b from-cyan-500 to-cyan-700 hover:from-cyan-600 hover:to-cyan-800 text-white px-4 py-2 rounded-2xl font-bold transition-all shadow-[0_4px_0_rgb(14,116,144)] active:shadow-[0_0px_0_rgb(14,116,144)] active:translate-y-1 min-w-max">
+                    👁️ Çözüm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto px-4 py-8 sm:px-6">
+        
+        <!-- Info Alert -->
+        <div class="bg-white/80 backdrop-blur rounded-3xl p-5 mb-8 border-2 border-teal-100 shadow-xl shadow-teal-100/50 flex gap-4 items-center transform hover:scale-[1.01] transition-transform">
+            <div class="text-4xl animate-bounce">💡</div>
+            <div>
+                <h3 class="font-bold text-teal-900 text-lg mb-1 font-title">Nasıl Oynanır?</h3>
+                <p class="text-sm text-slate-600 font-medium leading-relaxed">
+                    Kutucuklara doğru terimleri yazın. Her kutu <strong>bir harfi</strong> temsil eder! 
+                    <br>💡 <em>İki kelimeli cevaplarda aradaki boşlukları hazır bıraktık. Takılırsanız "İpucu" (💡) alabilirsiniz. "Havuzu Karıştır" butonu ile 200 soruyu yeniden dağıtabilirsiniz!</em>
+                </p>
+            </div>
+        </div>
+
+        <!-- Tabs Container -->
+        <div id="tabs-container" class="flex gap-2 mb-6 overflow-x-auto hide-scrollbar pb-2 px-1">
+            <!-- Tabs injected via JS -->
+        </div>
+
+        <!-- Sections Container -->
+        <div id="quiz-container" class="pb-10">
+            <!-- Questions injected via JS -->
+        </div>
+
+    </div>
+
+    <!-- Custom Modal for Results -->
+    <div id="result-modal" class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-[2rem] shadow-2xl max-w-sm w-full p-8 text-center border-4 border-teal-100 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-teal-400 to-cyan-500 -z-10 rounded-t-[1.7rem]"></div>
+            
+            <div id="modal-icon" class="text-6xl mb-2 mt-4 drop-shadow-xl bg-white w-24 h-24 mx-auto rounded-full flex items-center justify-center border-4 border-teal-200">🎉</div>
+            <h3 id="modal-title" class="text-3xl font-black text-slate-800 mb-2 font-title mt-4">Mükemmel!</h3>
+            <p id="modal-message" class="text-slate-500 font-medium mb-6">Bölümdeki tüm soruları doğru cevapladınız.</p>
+            
+            <div class="bg-slate-50 rounded-2xl p-5 mb-6 flex justify-around items-center border-2 border-slate-100">
+                <div>
+                    <div class="text-xs text-slate-400 font-black uppercase tracking-widest mb-1">SKOR</div>
+                    <div id="modal-score" class="text-2xl font-black text-teal-600 drop-shadow-sm">50/50</div>
+                </div>
+                <div class="w-1 h-12 bg-slate-200 rounded-full"></div>
+                <div>
+                    <div class="text-xs text-slate-400 font-black uppercase tracking-widest mb-1">SÜRE</div>
+                    <div id="modal-time" class="text-2xl font-black text-slate-700 drop-shadow-sm">01:45</div>
+                </div>
+            </div>
+
+            <button onclick="closeModal()" class="w-full bg-gradient-to-b from-teal-500 to-teal-700 hover:from-teal-600 hover:to-teal-800 text-white font-black text-lg py-4 px-4 rounded-2xl transition-all shadow-[0_6px_0_rgb(15,118,110)] active:shadow-[0_0px_0_rgb(15,118,110)] active:translate-y-2">
+                Devam Et 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // YENİ DERS NOTU (M.KEMAL, TRABLUSGARP, BALKAN, I. DÜNYA SAVAŞI, MONDROS) - 200 SORULUK HAVUZ
+        const masterPool = [
+            // M. Kemal Erken Dönem & 31 Mart (1-20)
+            "Mustafa Kemal'in eğitime başladığı ilk yer [Hafız] [Mehmet] Efendi Mektebi'dir.",
+            "Mustafa Kemal'in Batı tarzı eğitim veren ve sonradan geçtiği okul [Şemsi] [Efendi] Mektebi'dir.",
+            "Babasının vefatından sonra Mustafa'nın yazıldığı sivil okul Selanik [Mülkiye] Rüştiyesi'dir.",
+            "Asker olma arzusuyla geçtiği ve Kemal adını aldığı okul Selanik Askeri [Rüştiyesi] 'dir.",
+            "Mustafa Kemal'e tarih sevgisini aşılayan öğretmeni Mehmet [Tevfik] [Bilge] 'dir.",
+            "Manastır Askeri İdadisi'nde sınıf arkadaşı olan ve ona edebiyat sevgisi aşılayan kişi [Ömer] [Naci] 'dir.",
+            "Mustafa Kemal'in lisedeyken katılmayı en çok istediği ve onu heyecanlandıran savaş [Dömeke] Meydan Savaşı'dır.",
+            "Mustafa Kemal'in ilk görev yeri [Şam] 'daki 5. Ordu'dur.",
+            "Mustafa Kemal'in Şam'da kurduğu cemiyetin adı [Vatan] ve [Hürriyet] Cemiyeti'dir.",
+            "Vatan ve Hürriyet Cemiyeti daha sonra [İttihat] ve Terakki ile birleştirilmiştir.",
+            "Mustafa Kemal'in tarih sahnesine çıkışı ve ilk siyasi başarısı [Otuz] [Bir] [Mart] İsyanı'nı bastırmasıdır.",
+            "31 Mart İsyanı'nı bastıran Hareket Ordusu'nda Mustafa Kemal [Kurmay] [Başkanı] olarak görev yapmıştır.",
+            "Mustafa Kemal'in ilk yurt dışı görevi sayılan Fransa'daki askeri tatbikat [Picardi] Manevraları'dır.",
+            "Mustafa Kemal'in gönüllü katıldığı ilk savaş ve ilk askeri başarısı [Trablusgarp] Savaşı'dır.",
+            "Trablusgarp Savaşı, Mustafa Kemal'in emperyalizme (sömürgeciliğe) karşı [ilk] mücadelesidir.",
+            "Mustafa Kemal Trablusgarp'a giderken kullandığı takma ad Gazeteci [Şerif] Bey'dir.",
+            "Mustafa Kemal Trablusgarp'ta [Derne] ve Tobruk cephelerinde başarılı savunmalar yapmıştır.",
+            "Mustafa Kemal II. Balkan Savaşı'nda Akdeniz Birleşik Boğazlar Dairesi'nde görev alarak [Bolayır] Cephesi'nde bulunmuştur.",
+            "Mustafa Kemal Balkan Savaşları'ndan sonra [Sofya] Ataşemiliterliğine (Askeri Ataşe) atanmıştır.",
+            "Trablusgarp'ta savaşırken sol gözünden şarapnel parçası ile yaralanan komutan [Mustafa] [Kemal] 'dir.",
+            
+            // Trablusgarp (21-40)
+            "İtalya'nın Trablusgarp'ı işgalindeki temel neden hammadde ve pazar, yani [sömürge] arayışıdır.",
+            "İtalya'nın Trablusgarp işgalinde Habeşistan'daki [yenilgisini] unutturma çabası da etkilidir.",
+            "İtalya'nın Trablusgarp işgaline Rusya'nın onay verdiği 1909 tarihli antlaşma [Racconigi] Antlaşması'dır.",
+            "İngiltere'nin [Mısır] 'ı işgal altında tutması nedeniyle Trablusgarp'a karadan yardım gidememiştir.",
+            "Trablusgarp Savaşı'nda İtalyanlar tarihte ilk kez [savaş] [uçağı] kullanmıştır.",
+            "Trablusgarp'ta yerel halkı örgütleyen Osmanlı gizli teşkilatı [Teşkilat] -ı [Mahsusa] 'dır.",
+            "Trablusgarp'ın 'Çöl Aslanı' lakaplı efsanevi yerel kahramanı [Ömer] [Muhtar] 'dır.",
+            "Enver Paşa Trablusgarp'a giderken Kuyumcu [Hamdi] Bey takma adını kullanmıştır.",
+            "Osmanlı subaylarının direnişi üzerine İtalya, Osmanlı'yı barışa zorlamak için [On] [İki] Ada ve Rodos'u işgal etmiştir.",
+            "İtalya Trablusgarp'ı alamayınca baskı yapmak için [Çanakkale] Boğazı'nı da topa tutmuştur.",
+            "Balkan Savaşları'nın çıkması üzerine Osmanlı'nın Kuzey Afrika'daki son toprağını kaybettiği antlaşma [Uşi] Antlaşması'dır.",
+            "Uşi Antlaşması ile İtalya'ya bırakılan Trablusgarp dini yönden Osmanlı [halifesine] bağlı kalacaktır.",
+            "Yunanistan tehlikesine karşı 12 Ada ve Rodos Uşi Antlaşması ile [geçici] süreliğine İtalya'ya bırakılmıştır.",
+            "Osmanlı'nın Kuzey Afrika'da kaybettiği ilk toprak Cezayir, son toprak ise [Trablusgarp] olmuştur.",
+            "Fransa'nın Trablusgarp işgaline onay vermesinin amacı İtalya'yı [Almanya] blokundan koparmaktır.",
+            "İngiltere, Mısır ile Fransız sömürgeleri arasında İtalya'yı kullanarak bir [tampon] bölge kurmak istemiştir.",
+            "Kuzey Afrika topraklarının kaybedilmesinde Milliyetçilik değil [Sömürgecilik] akımı etkili olmuştur.",
+            "Uşi Antlaşması Trablusgarp Savaşı'nı bitiren barış antlaşmasıdır, imzalandığı ülke [İsviçre] 'dir.",
+            "Trablusgarp Savaşı'nda Teşkilat-ı Mahsusa ajanı olarak görev alan önemli isimlerden biri de Kuşçubaşı [Eşref] 'tir.",
+            "Trablusgarp'ın İtalya'ya bırakılmasıyla Osmanlı'nın üç kıtada [toprak] bulundurma özelliği fiilen sona ermiştir.",
+
+            // Balkan Savaşları I & II (41-75)
+            "I. Balkan Savaşı'nın çıkmasında Rusya'nın Slavları birleştirme politikası olan [Panslavizm] etkilidir.",
+            "I. Balkan Savaşı bir bağımsızlık hareketi değil, Osmanlı'yı Balkanlardan atma yani bir [milliyetçilik] hareketidir.",
+            "Balkan devletlerinin Fener Rum Patrikhanesine karşı birleşmesini sağlayan [Kiliseler] Sorununun çözülmesidir.",
+            "I. Balkan Savaşı'nda Osmanlı'ya ilk saldıran ve savaşı başlatan devlet [Karadağ] 'dır.",
+            "Savaş sırasında bağımsızlığını ilan ederek Osmanlı'dan ayrılan son Balkan devleti [Arnavutluk] 'tur.",
+            "Arnavutluk'un ayrılmasıyla tüm unsurları bir arada tutmayı amaçlayan [Osmanlıcılık] fikri tamamen çökmüştür.",
+            "I. Balkan Savaşı sonunda Osmanlı'nın Edirne'yi kaybederek çekildiği batı sınırı [Midye] - [Enez] hattıdır.",
+            "Ege'de Yunan donanmasını geciktiren Hamidiye Kruvazörü komutanı Hüseyin [Rauf] [Orbay] 'dır.",
+            "Edirne Savunması'nda Bulgarlara karşı kahramanca direnen ünlü komutan Mehmet [Şükrü] Paşa'dır.",
+            "Kamil Paşa hükümetinin Edirne'yi vermeyi kabul etmesi üzerine İttihatçıların yaptığı hükümet darbesine [Babıali] Baskını denir.",
+            "Babıali Baskını ile devrilen sadrazam Kamil Paşa, yerine geçen sadrazam ise Mahmut [Şevket] Paşa'dır.",
+            "I. Balkan Savaşı'nı sona erdiren ve Osmanlı'nın büyük toprak kaybettiği antlaşma [Londra] Antlaşması'dır.",
+            "Londra Konferansı sonucunda BADEM kodlamasıyla kaybedilen yerlerden 'B' harfi [Batı] [Trakya] 'dır.",
+            "Londra Konferansı sonucunda BADEM kodlamasıyla kaybedilen yerlerden 'M' harfi [Makedonya] 'dır.",
+            "Ordunun siyasete girmesi ve subaylar arasındaki [mektepli] - alaylı çekişmesi I. Balkan yenilgisinde etkilidir.",
+            "I. Balkan Savaşı'nda esir düşen ve bu acı günleri eserlerinde anlatan ünlü yazar [Ömer] [Seyfettin] 'dir.",
+            "II. Balkan Savaşı, I. Balkan Savaşı'nda aslan payını alan [Bulgaristan] 'a karşı diğer devletlerin saldırmasıyla çıkmıştır.",
+            "I. Balkan Savaşı'na katılmayıp Dobruca sorunu yüzünden II. Balkan Savaşı'na katılan devlet [Romanya] 'dır.",
+            "II. Balkan Savaşı fırsat bilinerek Bulgarlardan geri alınan şehirlerimiz [Edirne] ve Kırklareli'dir.",
+            "Edirne'nin geri alınmasında büyük rol oynayan Enver Paşa'ya [Edirne] [Fatihi] unvanı verilmiştir.",
+            "II. Balkan Savaşı sonunda Balkan devletlerinin kendi aralarında imzaladıkları belge [Bükreş] Antlaşması'dır.",
+            "II. Balkan Savaşı sonrası Osmanlı ile Bulgaristan arasında [Meriç] Nehri sınır kabul edilerek İstanbul Antlaşması imzalanmıştır.",
+            "Osmanlı ile Yunanistan arasında imzalanan ve Girit ile Selanik'in bırakıldığı belge [Atina] Antlaşması'dır.",
+            "Sırbistan ile kara bağlantımız kalmamasına rağmen orada kalan Türklerin hakları için 1914'te [İstanbul] Antlaşması imzalanmıştır.",
+            "Balkan Savaşları sonrası Atina ve İstanbul antlaşmaları ile sınır dışında kalan soydaşlarımız için Batı [Trakya] Türkleri Sorunu ortaya çıkmıştır.",
+            "Balkan Savaşları sonunda İttihat ve Terakki'nin yönetimde kurduğu baskıcı döneme Üç [Paşalar] dönemi denir.",
+            "Balkan Savaşları sonucunda kaybedilen topraklardan Anadolu'ya büyük [göçler] yaşanmıştır.",
+            "Balkanlardaki toprak kayıpları Osmanlıcılık akımını bitirmiş, İttihat ve Terakki'nin yeni ideolojisi [Türkçülük] olmuştur.",
+            "Göçmen sorunlarını çözmek ve iskanı sağlamak amacıyla kurulan teşkilat Muhacirin [Komisyonu] 'dur.",
+            "Balkan Savaşları sonucunda Ege Adaları sorunu için 1914'te toplanan konferans [Elçiler] Konferansı'dır.",
+            "Elçiler Konferansı ile Bozcaada, Gökçeada ve [Tavşanlı] Adası hariç Ege'nin çoğunluğu kaybedilmiştir.",
+            "Makedonya kaybedilince Osmanlı'nın [Sırbistan] ile hiçbir kara bağlantısı kalmamıştır.",
+            "Osmanlı ordusunun bir kısmının Balkan Savaşı öncesi Vahabi isyanı nedeniyle [Yemen] 'e (Arap Yarımadası'na) gönderilmesi yenilgide etkilidir.",
+            "İttihat ve Terakki'nin tecrübeli komutanları [emekli] etmesi ve gençleştirme politikası ordunun sevk idaresini zayıflatmıştır.",
+            "Babıali Baskını bir rejim değişikliği değil, sadece silahlı bir [hükümet] darbesidir.",
+
+            // I. Dünya Savaşı Nedenleri & Osmanlı'nın Girişi (76-105)
+            "I. Dünya Savaşı'nda Almanya ve İtalya'nın sömürge arayışına girmesinin temel sebebi [Sanayi] İnkılabı'dır.",
+            "Rusya'nın izlediği Panslavizm politikası, [Germen] devletlerle (Almanya ve Avusturya) rekabete yol açmıştır.",
+            "Savaş öncesinde Almanya, Avusturya-Macaristan ve Rusya'nın oluşturduğu birliğe Üç [İmparatorlar] Ligi denir.",
+            "İngiltere, Fransa ve Rusya'nın temelini oluşturduğu bloğa [İtilaf] Devletleri (Anlaşma) denir.",
+            "İttifak (Bağlaşma) grubuna savaş başladıktan sonra en son katılan devlet [Bulgaristan] 'dır.",
+            "Savaş başladıktan sonra kendisine vadedilen topraklar için taraf değiştiren devlet [İtalya] 'dır.",
+            "Savaş sırasında ihtilal yaşayarak rejim değiştiren ve savaştan çekilen devlet [Rusya] 'dır.",
+            "Alman denizaltılarının ticaret gemilerini batırmasıyla savaşa girip gidişatı değiştiren devlet [Amerika] Birleşik Devletleri'dir.",
+            "İtilaf Devletleri safına savaşa en son katılan balkan devleti [Yunanistan] 'dır.",
+            "Japonya'nın Uzak Doğu'da Almanya'nın sömürgelerine saldırması [İngiltere] ile anlaştığını gösterir.",
+            "Almanya ile Fransa arasındaki zengin maden yataklarına sahip sorunlu bölge [Alsas] - [Loren] bölgesidir.",
+            "Savaşı başlatan görünür neden Avusturya Arşidükü'nün [Saraybosna] ziyaretinde bir Sırplı tarafından öldürülmesidir.",
+            "Dünya Savaşı başladığında Osmanlı tahtında padişah V. [Mehmet] [Reşat] bulunuyordu.",
+            "Osmanlı'nın savaşın başında ekonomik bağımsızlık için [kapitülasyonları] tek taraflı kaldırması 'Özgürlük Günü' olarak kutlanmıştır.",
+            "Osmanlı'nın savaşın başında Boğazları kapatması ve [seferberlik] ilan etmesi savaşa hazırlandığını gösterir.",
+            "Almanya'nın Osmanlı'yı yanında istemesinin en önemli nedeni Osmanlı'nın [jeopolitik] konumudur.",
+            "Almanya, halifelik gücünü kullanarak İngiliz sömürgelerindeki [Müslümanları] ayaklandırmak istemiştir.",
+            "Almanya, Rusya'daki Türkleri Osmanlı liderliğinde ayaklandırmak için [Turancılık] idealini kullanmak istemiştir.",
+            "Almanya'nın Bağdat ve Bakü petrollerine ulaşmak için izlediği demiryolu politikasına [Üç] [B] politikası denir.",
+            "Almanya, Osmanlı'nın teknolojik gücünden değil, sahip olduğu asker yani [nüfus] gücünden faydalanmak istemiştir.",
+            "İngiltere'nin Osmanlı'nın parasını ödediği [Reşadiye] ve Osman gemilerine el koyması ilişkileri koparmıştır.",
+            "Enver Paşa'nın 2 Ağustos 1914'te Almanya ile yaptığı antlaşma [Gizli] İttifak Antlaşması'dır.",
+            "İngiliz donanmasından kaçarak Osmanlı'ya sığınan Alman zırhlıları Goben ve [Breslav] 'dır.",
+            "Goben ve Breslav gemilerine Osmanlı tarafından [Yavuz] ve [Midilli] adları verilerek satın alındığı açıklanmıştır.",
+            "Osmanlı donanmasının Rusya'nın Sivastopol ve [Odessa] limanlarını bombalamasıyla Osmanlı savaşa fiilen girmiştir.",
+            "Osmanlı'nın savaşa girmesiyle yeni cepheler açılmış ve savaşın alanı [genişlemiştir] .",
+            "Padişah V. Mehmet Reşat, Müslümanları savaşa çağırmak için [Cihad] -ı Ekber ilan etmiştir.",
+            "Cihat çağrısının Araplarca dikkate alınmaması ve ihanetler [İslamcılık] (Ümmetçilik) fikrinin zayıfladığını gösterir.",
+            "İngiltere, Osmanlı savaşa girince Berlin Antlaşması öncesi emanet aldığı [Kıbrıs] 'ı ilhak ettiğini açıklamıştır.",
+            "Osmanlı'nın savaşa girmesi savaşın [süresini] de önemli ölçüde uzatmıştır.",
+
+            // Cepheler (106-150)
+            "Osmanlı'nın I. Dünya Savaşı'nda taarruz (saldırı) amacıyla açtığı cepheler Kafkas ve [Kanal] cepheleridir.",
+            "İtilaf Devletleri'nin Çarlık Rusya'ya yardım götürmek ('ÇIRAK') için açtığı cepheler Çanakkale ve [Irak] cepheleridir.",
+            "Sınırlarımız dışında müttefiklere yardım için savaştığımız cepheler Galiçya, [Makedonya] ve Romanya'dır.",
+            "Osmanlı'nın savaşa girdiğinde ilk açtığı taarruz cephesi [Kafkas] Cephesi'dir.",
+            "Kafkas Cephesi'nde 1878'de kaybedilen Kars, Ardahan ve [Batum] 'u (Elviye-i Selase) geri almak amaçlanmıştır.",
+            "Kafkas Cephesi'nde Enver Paşa'nın taarruz emriyle ağır kış şartlarında yaşanan büyük felaket [Sarıkamış] Harekatı'dır.",
+            "Kafkasya'da Ruslarla işbirliği yapan Ermenileri savaş bölgesi dışına göç ettiren yasa [Tehcir] Kanunu'dur.",
+            "Tehcir Kanunu (Sevk ve İskan Kanunu) dönemin Dahiliye Nazırı [Talat] Paşa tarafından çıkarılmıştır.",
+            "Mustafa Kemal Kafkas Cephesi'ne atandıktan sonra Ruslardan [Muş] ve Bitlis'i geri almıştır.",
+            "Mustafa Kemal'e Kafkas Cephesi'ndeki başarılarından dolayı Altın Kılıç Madalyası verilmiş ve [Generalliğe] yükselmiştir.",
+            "Bolşevik İhtilali sonrası Rusya'nın Osmanlı ile imzaladığı ilk ateşkes antlaşması [Erzincan] Ateşkesi'dir.",
+            "Rusya'nın savaştan tamamen çekildiği ve Kars, Ardahan, Batum'u geri verdiği antlaşma [Brest] - [Litovsk] Antlaşması'dır.",
+            "Ermenilerin Bakü'yü işgali üzerine Nuri Killigil komutasında kurulan kurtarıcı ordu [Kafkas] [İslam] Ordusu'dur.",
+            "Enver Paşa'nın kardeşi Nuri Killigil (Paşa) tarihte [Bakü] Fatihi olarak anılır.",
+            "Mısır'ı geri almak ve İngiliz sömürge yolunu kesmek için açılan taarruz cephesi [Kanal] Cephesi'dir.",
+            "Kanal Cephesi komutanı Cemal Paşa'dır, iki taarruz da başarısız olunca İngilizler [Suriye] - [Filistin] cephesini açmıştır.",
+            "İngilizlerin bölgedeki petrolleri ele geçirmek ve Rusya'ya karadan yardım götürmek için açtığı cephe [Irak] Cephesi'dir.",
+            "Irak Cephesi'nde Halil Paşa'nın İngiliz ordusunu esir aldığı büyük ve şanlı zafer [Kutül] [Amare] Zaferi'dir.",
+            "Halil Kut Paşa'nın esir aldığı İngiliz generali [Townshend] 'dir.",
+            "Kutsal toprakları (Mekke, Medine) korumak için destansı bir savunma yapılan cephe [Hicaz] - [Yemen] Cephesi'dir.",
+            "Mondros'tan sonra bile Medine'yi 90 gün daha savunan 'Çöl Kaplanı' lakaplı komutan [Fahrettin] [Paşa] 'dır.",
+            "Fahrettin Paşa (Türkan) askerlerinin aç kalması üzerine tarihe geçen [Çekirge] Kararnamesi'ni yayınlamıştır.",
+            "Çanakkale Cephesi'nin açılma nedenlerinden biri de Boğazlar üzerinden [Almanya] 'ya karşı yeni bir cephe açmaktır.",
+            "Çanakkale savaşlarında birçok eğitimli gencin şehit düşmesi nedeniyle bu savaşa [Aydınlar] Savaşı da denir.",
+            "Tarafların esir ve cenaze değişimi için ateşkes yapmaları nedeniyle Çanakkale'ye [Centilmenler] Savaşı da denir.",
+            "Çanakkale kara savaşlarında İtilaf devletlerinin çıkarma yaptığı ana bölge [Gelibolu] Yarımadası'dır.",
+            "İngiliz ve Fransız ortak donanmasının boğazı geçmeye çalıştığı gün [On] [Sekiz] [Mart] 1915 Deniz Zaferi'dir.",
+            "Nusrat Mayın Gemisi'nin operasyonunu başarıyla yöneten 18 Mart Kahramanı [Cevat] [Çobanlı] 'dır.",
+            "256 kiloluk mermiyi kaldırarak Ocean zırhlısını vuran büyük kahraman [Seyit] [Onbaşı] 'dır.",
+            "Çanakkale kara savaşlarında Mustafa Kemal'in 'Ben size taarruzu değil ölmeyi emrediyorum' dediği alay [Elli] [Yedinci] Alay'dır.",
+            "Çanakkale Savaşları'nda Mustafa Kemal [On] [Dokuzuncu] Tümen Komutanı olarak görev yapmıştır.",
+            "Mustafa Kemal Çanakkale'deki başarılarından dolayı [Anafartalar] Kahramanı unvanını almıştır.",
+            "Çanakkale'de görev yapan ve 'Alçıtepe Kahramanı' olarak bilinen komutan [Kazım] [Karabekir] 'dir.",
+            "Çanakkale zaferi ile Çarlık Rusya'ya yardım gidememiş ve [Bolşevik] İhtilali süreci hızlanmıştır.",
+            "Başarılı olduğumuz ve başkent İstanbul'un işgalini önleyen tek cephe [Çanakkale] Cephesi'dir.",
+            "Çanakkale zaferi sonucunda [Bulgaristan] İttifak grubuna katılmış ve Almanya ile kara bağlantısı sağlanmıştır.",
+            "Çanakkale kara savaşlarında Avustralya ve Yeni Zelandalı askerlerden oluşan kolorduya [Anzak] (ANZAC) denir.",
+            "Suriye-Filistin Cephesi'nde İngiliz ilerleyişini Halep önlerinde (Katma Savaşı) durduran komutan [Mustafa] [Kemal] 'dir.",
+            "Suriye-Filistin Cephesi, I. Dünya Savaşı'nda en çok [toprak] kaybedilen ve son kapanan cephedir.",
+            "Suriye-Filistin cephesindeki başarısızlıklar sonrası Kudüs'te İsrail kurulmasına zemin hazırlayan belge [Balfour] Deklarasyonu'dur.",
+            "Mondros Ateşkesi sonrasında Liman von Sanders'ın yerine Mustafa Kemal [Yıldırım] Orduları Grup Komutanı olmuştur.",
+            "Irak Cephesi'nde Halil Kut Paşa Kut'ül Amare dışında [Selman] -ı Pak bölgesinde de başarılı bir savunma yapmıştır.",
+            "Çanakkale Cephesi'nde 'Çanakkale Geçilmez' ifadesinin geçtiği rapor İngiliz komutanın hazırladığı [Birdwood] Raporu'dur.",
+            "I. Dünya Savaşı'nda Romanya, Galiçya ve Kafkas cephelerinde savaştığımız ortak düşman devleti [Rusya] 'dır.",
+            "Mustafa Kemal'in I. Dünya Savaşı'nda savaştığı cephelerin sırası Çanakkale, Kafkas ve [Suriye] - [Filistin] şeklindedir.",
+
+            // Gizli Antlaşmalar, Wilson İlkeleri & Savaşın Sonu (151-175)
+            "İtilaf Devletleri'nin savaş sonrası paylaşım tartışmalarını önlemek için kendi aralarında yaptığı antlaşmalara [Gizli] Antlaşmalar denir.",
+            "Gizli antlaşmalarla Boğazlar ve Doğu Trakya'nın Çarlık Rusya'ya vadedildiği antlaşma [İstanbul] Antlaşması'dır.",
+            "İtalya'nın İtilaf safına geçtiği ve Antalya ile 12 Ada'nın vadedildiği gizli antlaşma [Londra] Antlaşması'dır.",
+            "İngiltere ve Fransa'nın Ortadoğu'yu (Irak, Suriye, Lübnan) kendi aralarında paylaştığı en önemli antlaşma [Sykes] - [Picot] Antlaşması'dır.",
+            "Arapların Osmanlı'ya karşı İngilizlerin yanında savaşması karşılığında bağımsızlık vadedilen antlaşma [McMahon] Antlaşması'dır.",
+            "İtalya'ya İzmir, Batı Anadolu ve Konya'nın vadedildiği antlaşma Saint [Jean] de [Maurienne] Antlaşması'dır.",
+            "Gizli antlaşmaları dünyaya 'Sarı Kitap' adlı yayınla duyuran devlet, Bolşevik ihtilali yaşayan [Rusya] 'dır.",
+            "ABD'nin kendi kıtasına çekildiği geleneksel yalnızlık politikasına [Monroe] Doktrini denir.",
+            "ABD, Alman denizaltılarının sivil gemilerini batırması ve Meksika'yı kışkırtan [Zimmermann] Telgrafı olayı ile savaşa girmiştir.",
+            "ABD'nin savaşa girmesi 1917 yılını I. Dünya Savaşı'nın [kader] yılı yapmış ve savaşın gidişatını değiştirmiştir.",
+            "ABD Başkanı Wilson'un savaş sonrası kalıcı barışı sağlamak için yayınladığı bildiriye [Wilson] [İlkeleri] denir.",
+            "Wilson İlkeleri'ne göre yenen devletler yenilen devletlerden [toprak] ve savaş tazminatı almayacaktır.",
+            "İngiltere ve Fransa, toprak almamak kuralını kendi lehlerine çevirmek için [Manda] ve Himaye sistemini uydurmuştur.",
+            "İtilaf devletleri savaş tazminatı almamak kuralını delmek için ise [Tamirat] Bedeli (Onarım Parası) adı altında para almışlardır.",
+            "Wilson İlkeleri'nde devletlerarası barışı sağlamak için kurulması önerilen uluslararası teşkilat Cemiyet-i [Akvam] 'dır.",
+            "Her ulus kendi geleceğine kendisi karar verecek kuralı (Self-determinasyon) [İmparatorlukların] dağılmasını hızlandırmıştır.",
+            "Türklerin çoğunlukta olduğu yerlerde Türk egemenliği sağlanacak maddesi Milli Mücadele'nin [haklılığına] en büyük dayanak olmuştur.",
+            "Osmanlı, Avusturya ve Bulgaristan Wilson İlkeleri'ne güvenerek toprak kaybetmeyecekleri umuduyla [ateşkes] istemiştir.",
+            "I. Dünya Savaşı'ndan en karlı çıkan devletler İngiltere, Fransa ve Uzak Doğu'da sömürge elde eden [Japonya] olmuştur.",
+            "Savaştan ilk çekilen İttifak devleti [Bulgaristan] , ilk çekilen İtilaf devleti ise Japonya'dır.",
+            "Yenilen devletlere imzalatılan ağır barış antlaşmaları (Özellikle Versay), dünyayı [İkinci] Dünya Savaşı'na sürüklemiştir.",
+            "Almanya ile imzalanan, zorunlu askerliği kaldıran ve Ren bölgesini silahsızlandıran ağır antlaşma [Versay] Antlaşması'dır.",
+            "I. Dünya Savaşı sonrasında tank, denizaltı ve uçak gibi silahların gelişmesi sivil [savunma] örgütlerinin kurulmasına yol açmıştır.",
+            "Avusturya-Macaristan, Alman, Rus Çarlığı ve Osmanlı gibi büyük çok uluslu [imparatorluklar] savaş sonucunda yıkılmıştır.",
+            "I. Dünya Savaşı'nı resmen bitiren barış antlaşmalarının taslakları 18 Ocak 1919'daki [Paris] Barış Konferansı'nda hazırlanmıştır.",
+
+            // Mondros, Paris Barış Konferansı, İzmir'in İşgali (176-200)
+            "Mondros Mütarekesi imzalandığında Osmanlı hükümeti adına Bahriye Nazırı Hüseyin [Rauf] [Orbay] başkandı.",
+            "Mondros Ateşkes Antlaşması, Limni adasının Mondros limanında demirli [Agamemnon] zırhlısında imzalanmıştır.",
+            "İtilaf Devletleri güvenliklerini tehdit eden herhangi bir stratejik noktayı işgal edebilecek maddesi Madde [Yedi] 'dir.",
+            "Mondros Madde 7, tüm Anadolu'yu işgallere açık hale getirmiş ve işgallere yasal [dayanak] oluşturmuştur.",
+            "Vilayet-i Sitte'de (Altı Doğu İli) karışıklık çıkarsa İtilaf devletleri buraları işgal edebilecek maddesi Madde [Yirmi] [Dört] 'tür.",
+            "Vilayet-i Sitte maddesinin (Madde 24) temel amacı Doğu Anadolu'da bağımsız bir [Ermeni] devleti kurmaktır.",
+            "Vilayet-i Sitte (Altı Doğu İli) şehirleri Bitlis, Erzurum, Sivas, Van, Elazığ (Harput) ve [Diyarbakır] 'dır.",
+            "Mondros'taki tüm haberleşme araçlarının İtilaf kontrolüne verilmesi maddesi halkın [örgütlenmesini] engellemeyi amaçlar.",
+            "Osmanlı ordusunun terhis edilmesi emrine uymayan 15. Kolordu komutanı [Kazım] [Karabekir] 'dir.",
+            "Ordunun terhis edilmesi ve işgallerin başlaması, halkın kendi silahlı gücü olan [Kuvayi] [Milliye] 'nin kurulmasına zemin hazırlamıştır.",
+            "Mondros ile Osmanlı Devleti [fiilen] , Mudanya ile hukuken, Saltanatın kaldırılmasıyla resmen sona ermiştir.",
+            "Mondros'tan sonra ilk işgal edilen Osmanlı toprağı, İngilizlerin petrolü için girdiği [Musul] 'dur.",
+            "Mondros sonrası Anadolu'da ilk işgal edilen yer Fransızların girdiği [Hatay] (Dörtyol) bölgesidir.",
+            "Paris Barış Konferansı'nda İzmir ve çevresi (Güçlü bir İtalya istenmediği için) İtalya'dan alınarak [Yunanistan] 'a verilmiştir.",
+            "İzmir'in İtalya yerine Yunanistan'a verilmesi, İtilaf Devletleri arasındaki ilk ciddi [görüş] [ayrılığıdır] .",
+            "Paris Konferansı'nda Osmanlı'nın paylaşımı konusunda anlaşılamadığı için [Sevr] Antlaşması'nın taslağı hazırlanamamıştır.",
+            "Yunanlıların İzmir'i işgali diğer işgaller gibi geçici değil, kalıcı bir [ilhak] (topraklarına katma) amacı taşır.",
+            "Yunanistan'ın İzmir'i işgal ederken Bizans'ı yeniden kurma hayaline [Megali] [İdea] (Büyük İdea) denir.",
+            "15 Mayıs 1919'da İzmir'de Yunanlılara karşı İlk Kurşun'u atan gazeteci Hasan Tahsin'in gerçek adı Osman [Nevres] 'tir.",
+            "Ödemiş'te Yunanlılara karşı ilk silahlı direnişi (İlk Kurşun Savaşları) başlatan kişi Ali [Çetinkaya] 'dır.",
+            "Yaşasın Venizelos demeyi reddettiği için İzmir'de Yunan askerleri tarafından şehit edilen komutan Albay [Süleyman] [Fethi] Bey'dir.",
+            "İzmir'in işgali halkta büyük infial yaratmış ve protesto için Sultanahmet, Fatih ve Maşatlık'ta büyük [mitingler] düzenlenmiştir.",
+            "Türk Milli Mücadelesinin haklılığını ortaya koyan İLK uluslararası belge Amiral [Bristol] Raporu'dur.",
+            "Amiral Bristol Raporu, İzmir'de iddia edildiği gibi Rumların değil [Türklerin] çoğunlukta olduğunu belirtmiştir.",
+            "General Harbord Raporu, Doğu Anadolu'da [Ermenilerin] değil Türklerin çoğunlukta olduğunu ve manda yönetiminin kurulamayacağını kanıtlamıştır."
+        ];
+
+        let activeTab = 1;
+        let activeQuestions = { 1: [], 2: [], 3: [], 4: [] };
+        let sectionScores = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        let sectionProgress = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        let isSectionChecked = { 1: false, 2: false, 3: false, 4: false };
+
+        let timerInterval;
+        let secondsElapsed = 0;
+        let isTimerRunning = false;
+
+        window.onload = () => {
+            shuffleAndDeal();
+        };
+
+        // --- Shuffle and Deal ---
+        function shuffleAndDeal() {
+            let pool = [...masterPool];
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+
+            activeQuestions[1] = pool.slice(0, 50);
+            activeQuestions[2] = pool.slice(50, 100);
+            activeQuestions[3] = pool.slice(100, 150);
+            activeQuestions[4] = pool.slice(150, 200);
+
+            for(let i=1; i<=4; i++) {
+                sectionScores[i] = 0;
+                sectionProgress[i] = 0;
+                isSectionChecked[i] = false;
+            }
+
+            buildTabs();
+            switchTab(1);
+            resetTimer();
+            removeMistakesTab();
+            document.getElementById('progress-bar').style.width = `0%`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function buildTabs() {
+            const tabsContainer = document.getElementById('tabs-container');
+            const quizContainer = document.getElementById('quiz-container');
+            tabsContainer.innerHTML = '';
+            quizContainer.innerHTML = '';
+
+            for(let i=1; i<=4; i++) {
+                // Tab Button
+                const btn = document.createElement('button');
+                btn.id = `tab-btn-${i}`;
+                btn.innerHTML = `Test ${i}`;
+                btn.onclick = () => switchTab(i);
+                tabsContainer.appendChild(btn);
+
+                // Section Container
+                const sectionDiv = document.createElement('div');
+                sectionDiv.id = `section-${i}`;
+                sectionDiv.className = `section-container bg-white/50 backdrop-blur-2xl p-6 sm:p-8 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-white/60 hidden`;
+                
+                const title = document.createElement('h2');
+                title.className = 'text-2xl font-black text-slate-800 mb-6 pb-4 border-b-2 border-slate-200/50 flex items-center gap-3 font-title';
+                title.innerHTML = `<span class="bg-indigo-100 text-indigo-600 p-2 rounded-xl text-lg"><i class="fas fa-layer-group"></i></span> Rastgele Seçilmiş 50 Soru (Test ${i})`;
+                sectionDiv.appendChild(title);
+
+                const qList = document.createElement('div');
+                qList.className = 'space-y-6';
+
+                activeQuestions[i].forEach((qStr, index) => {
+                    const qItem = document.createElement('div');
+                    qItem.className = 'flex items-start gap-4 p-5 rounded-2xl question-card question-item relative';
+                    qItem.setAttribute('data-original', qStr); 
+                    
+                    const numBadge = document.createElement('span');
+                    numBadge.className = 'flex-shrink-0 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white font-black rounded-xl w-10 h-10 flex items-center justify-center text-sm shadow-[0_4px_10px_rgba(99,102,241,0.3)] mt-1 font-title';
+                    numBadge.innerText = index + 1;
+                    
+                    const qTextContainer = document.createElement('div');
+                    qTextContainer.className = 'text-lg leading-loose w-full text-slate-700 font-medium';
+
+                    let formattedHTML = qStr.replace(/\[(.*?)\]/g, (match, answer) => {
+                        const boxesHTML = Array.from({length: answer.length}).map(() => 
+                            `<span class="letter-box flex items-center justify-center w-6 h-8 sm:w-8 sm:h-10 border-2 border-slate-300 rounded-md bg-slate-50 text-indigo-600 font-bold text-lg sm:text-xl uppercase"></span>`
+                        ).join('');
+
+                        return `<span class="inline-flex items-center gap-1 sm:gap-2 mx-1 align-middle whitespace-nowrap">
+                                    <span class="relative inline-flex puzzle-container" data-answer="${answer}">
+                                        <input type="text" data-answer="${answer}" class="hidden-puzzle-input absolute inset-0 w-full h-full opacity-0 z-20 cursor-text" 
+                                               maxlength="${answer.length}"
+                                               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" 
+                                               oninput="updateVisualBoxes(this); startTimer(); updateProgress(${i});"
+                                               onfocus="this.classList.add('is-focused'); this.parentElement.classList.add('is-focused')"
+                                               onblur="this.classList.remove('is-focused'); this.parentElement.classList.remove('is-focused')">
+                                        <span class="flex gap-1 visual-box-container pointer-events-none">
+                                            ${boxesHTML}
+                                        </span>
+                                    </span>
+                                    <button onclick="useHint(this, '${answer}', ${i})" class="text-slate-300 hover:text-amber-500 transition-all flex items-center justify-center hover:scale-110 active:scale-95" title="İpucu Al">
+                                        💡
+                                    </button>
+                                </span>`;
+                    });
+
+                    qTextContainer.innerHTML = formattedHTML;
+                    qItem.appendChild(numBadge);
+                    qItem.appendChild(qTextContainer);
+                    qList.appendChild(qItem);
+                });
+
+                sectionDiv.appendChild(qList);
+                quizContainer.appendChild(sectionDiv);
+            }
+        }
+
+        function switchTab(id) {
+            activeTab = id;
+            const isMistakes = (id === 'mistakes');
+
+            document.querySelectorAll('.section-container').forEach(el => {
+                const sectionIdStr = el.id.replace('section-', '');
+                if(sectionIdStr == id) {
+                    el.classList.remove('hidden');
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(10px)';
+                    setTimeout(() => {
+                        el.style.transition = 'all 0.4s ease';
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                    }, 50);
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+            
+            document.querySelectorAll('[id^="tab-btn-"]').forEach(btn => {
+                const btnIdStr = btn.id.replace('tab-btn-', '');
+                if(btnIdStr == id) {
+                    if (id === 'mistakes') {
+                        btn.className = "px-6 py-3 rounded-2xl font-bold text-white bg-gradient-to-r from-orange-500 to-amber-500 shadow-[0_4px_15px_rgba(245,158,11,0.4)] transition-all whitespace-nowrap transform scale-105 z-10 font-title border-2 border-white/20";
+                    } else {
+                        btn.className = "px-6 py-3 rounded-2xl font-bold text-white bg-gradient-to-r from-teal-500 to-cyan-500 shadow-[0_4px_15px_rgba(20,184,166,0.4)] transition-all whitespace-nowrap transform scale-105 z-10 font-title border-2 border-white/20";
+                    }
+                } else {
+                    btn.className = "px-6 py-3 rounded-2xl font-bold text-slate-500 bg-white hover:bg-slate-50 hover:text-slate-800 transition-all whitespace-nowrap cursor-pointer border-2 border-transparent hover:border-slate-200 shadow-sm";
+                }
+            });
+
+            document.getElementById('score-wrapper').style.display = isMistakes ? 'none' : '';
+            document.getElementById('btn-check').style.display = isMistakes ? 'none' : '';
+            document.getElementById('btn-show').style.display = isMistakes ? 'none' : '';
+
+            if (!isMistakes) {
+                updateUIHeaders();
+                updateProgressBar();
+            } else {
+                document.getElementById('progress-bar').style.width = `100%`;
+            }
+        }
+
+        function updateUIHeaders() {
+            document.getElementById('progress-text').innerText = `Cevaplanan: ${sectionProgress[activeTab]} / 50`;
+            
+            if(isSectionChecked[activeTab]) {
+                document.getElementById('score-display').innerText = `${sectionScores[activeTab]}`;
+                document.getElementById('score-wrapper').classList.remove('from-amber-100', 'to-orange-100', 'text-amber-800', 'border-amber-200');
+                document.getElementById('score-wrapper').classList.add('from-emerald-100', 'to-teal-100', 'text-emerald-800', 'border-emerald-200');
+                document.getElementById('score-display').classList.replace('text-orange-600', 'text-teal-600');
+            } else {
+                document.getElementById('score-display').innerText = `0`;
+                document.getElementById('score-wrapper').classList.remove('from-emerald-100', 'to-teal-100', 'text-emerald-800', 'border-emerald-200');
+                document.getElementById('score-wrapper').classList.add('from-amber-100', 'to-orange-100', 'text-amber-800', 'border-amber-200');
+                document.getElementById('score-display').classList.replace('text-teal-600', 'text-orange-600');
+            }
+        }
+
+        function updateProgress(sectionIndex) {
+            if(isSectionChecked[sectionIndex]) return;
+            const inputs = document.querySelectorAll(`#section-${sectionIndex} .hidden-puzzle-input`);
+            let answered = 0;
+            inputs.forEach(el => {
+                if(el.value.trim() !== '') answered++;
+            });
+            sectionProgress[sectionIndex] = answered;
+            
+            if(activeTab === sectionIndex) {
+                document.getElementById('progress-text').innerText = `Cevaplanan: ${answered} / ${inputs.length}`;
+                updateProgressBar();
+            }
+        }
+
+        function updateProgressBar() {
+            if (activeTab === 'mistakes') return;
+            const inputs = document.querySelectorAll(`#section-${activeTab} .hidden-puzzle-input`);
+            if(inputs.length === 0) return;
+            const percentage = (sectionProgress[activeTab] / inputs.length) * 100;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+        }
+
+        // --- Utils ---
+        function levenshtein(a, b) {
+            if (a.length === 0) return b.length;
+            if (b.length === 0) return a.length;
+            let matrix = [];
+            for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+            for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1, 
+                            Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+                        );
+                    }
+                }
+            }
+            return matrix[b.length][a.length];
+        }
+
+        function normalizeString(str) {
+            let s = str.toLocaleLowerCase('tr-TR').replace(/[-'\s]/g, '');
+            return s.replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+                    .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+                    .replace(/î/g, 'i').replace(/â/g, 'a');
+        }
+
+        function formatTime(totalSeconds) {
+            const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const s = (totalSeconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        window.updateVisualBoxes = function(input) {
+            const container = input.nextElementSibling;
+            const boxes = container.children;
+            const val = input.value;
+            for(let i=0; i < boxes.length; i++) {
+                if(boxes[i].classList.contains('letter-box')) {
+                    boxes[i].innerText = val[i] || '';
+                    if (val[i] && val[i] !== ' ' && val[i] !== '-') {
+                        boxes[i].classList.add('pop-letter');
+                        setTimeout(() => boxes[i].classList.remove('pop-letter'), 200);
+                    }
+                }
+            }
+        };
+
+        function spawnFloatingScore(element) {
+            const floater = document.createElement('div');
+            floater.innerText = "⭐ Harika!";
+            floater.className = "absolute text-teal-500 font-black text-sm pointer-events-none animate-float-up z-50 drop-shadow-md whitespace-nowrap font-title";
+            const rect = element.getBoundingClientRect();
+            floater.style.left = `${rect.left + window.scrollX + rect.width / 2 - 30}px`;
+            floater.style.top = `${rect.top + window.scrollY - 10}px`;
+            document.body.appendChild(floater);
+            setTimeout(() => floater.remove(), 1000);
+        }
+
+        function startTimer() {
+            if (!isTimerRunning) {
+                isTimerRunning = true;
+                timerInterval = setInterval(() => {
+                    secondsElapsed++;
+                    document.getElementById('timer-display').innerText = formatTime(secondsElapsed);
+                }, 1000);
+            }
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+        }
+
+        function resetTimer() {
+            stopTimer();
+            secondsElapsed = 0;
+            document.getElementById('timer-display').innerText = "00:00";
+        }
+
+        window.useHint = function(btnElement, correctAnswer, sectionIndex) {
+            startTimer();
+            const container = btnElement.previousElementSibling;
+            const inputElement = container.querySelector('.hidden-puzzle-input');
+            let currentVal = inputElement.value;
+            let currentLen = currentVal.length;
+            if(currentLen >= correctAnswer.length || container.classList.contains('correct')) return;
+            inputElement.value = correctAnswer.substring(0, currentLen + 1);
+            updateVisualBoxes(inputElement);
+            container.classList.add('hinted'); 
+            btnElement.style.transform = 'scale(1.3)';
+            setTimeout(() => { btnElement.style.transform = 'scale(1)'; }, 200);
+            updateProgress(sectionIndex);
+        }
+
+        // --- Core Checking Logic ---
+        function checkAnswers() {
+            if (activeTab === 'mistakes') return; 
+            if (isSectionChecked[activeTab]) {
+                alert("Bu test zaten kontrol edildi. Havuzu karıştırıp yeni sorular alabilirsiniz.");
+                return;
+            }
+
+            let score = 0;
+            let wrongQuestions = new Set(); 
+            const inputs = document.querySelectorAll('#section-' + activeTab + ' .hidden-puzzle-input');
+
+            inputs.forEach(input => {
+                const container = input.closest('.puzzle-container');
+                const wasCorrectBefore = container.classList.contains('correct');
+                container.classList.remove('correct', 'incorrect', 'revealed', 'hinted');
+                
+                const userAnswerRaw = input.value.trim();
+                const correctAnswerRaw = input.getAttribute('data-answer');
+                const qItem = input.closest('.question-item');
+                const originalQuestionStr = qItem.getAttribute('data-original');
+
+                input.disabled = true; // Input'u kilitle
+
+                if (userAnswerRaw === '') {
+                    container.classList.add('incorrect');
+                    wrongQuestions.add(originalQuestionStr);
+                    input.placeholder = correctAnswerRaw;
+                    return;
+                }
+
+                const dist = levenshtein(normalizeString(userAnswerRaw), normalizeString(correctAnswerRaw));
+                const allowedMistakes = correctAnswerRaw.length <= 3 ? 0 : (correctAnswerRaw.length <= 7 ? 1 : 2);
+
+                if (dist <= allowedMistakes) {
+                    container.classList.add('correct');
+                    if(dist > 0) {
+                        input.value = correctAnswerRaw; 
+                        updateVisualBoxes(input);
+                    }
+                    score++;
+                    if(!wasCorrectBefore) spawnFloatingScore(container);
+                } else {
+                    container.classList.add('incorrect');
+                    wrongQuestions.add(originalQuestionStr); 
+                    input.value = "";
+                    input.placeholder = correctAnswerRaw;
+                    updateVisualBoxes(input);
+                }
+            });
+
+            sectionScores[activeTab] = score; 
+            isSectionChecked[activeTab] = true;
+            updateUIHeaders();
+
+            if (wrongQuestions.size > 0) {
+                showModal("Neredeyse!", `Bu testte ${wrongQuestions.size} hata veya boş var. Kurtarma modunda düzeltebilirsin!`, `${score}/${inputs.length}`, false);
+                buildMistakesTab(Array.from(wrongQuestions));
+                document.querySelector('#result-modal button').onclick = () => {
+                    closeModal();
+                    switchTab('mistakes');
+                    document.querySelector('#result-modal button').onclick = closeModal;
+                };
+            } else {
+                removeMistakesTab();
+                showModal("Mükemmel!", "Harika iş çıkardın. Bu testi hatasız tamamladın!", `${score}/${inputs.length}`, true);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- Modals & Mistakes Tab ---
+        function showModal(title, message, scoreStr, isPerfect = false) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+            document.getElementById('modal-score').innerText = scoreStr;
+            document.getElementById('modal-time').innerText = formatTime(secondsElapsed);
+            
+            const icon = document.getElementById('modal-icon');
+            if(isPerfect) {
+                icon.innerText = "🏆";
+                icon.className = "text-6xl mb-2 mt-4 drop-shadow-xl bg-gradient-to-br from-yellow-100 to-amber-100 w-24 h-24 mx-auto rounded-full flex items-center justify-center border-4 border-amber-300 animate-bounce";
+                confetti({ particleCount: 200, spread: 90, origin: { y: 0.5 }, colors: ['#0d9488', '#10b981', '#f59e0b', '#06b6d4'] });
+            } else {
+                icon.innerText = "📈";
+                icon.className = "text-6xl mb-2 mt-4 drop-shadow-xl bg-white w-24 h-24 mx-auto rounded-full flex items-center justify-center border-4 border-slate-200";
+            }
+            document.getElementById('result-modal').classList.add('active');
+            stopTimer(); 
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').classList.remove('active');
+        }
+
+        function buildMistakesTab(questionsArray) {
+            let tabsContainer = document.getElementById('tabs-container');
+            let quizContainer = document.getElementById('quiz-container');
+
+            let tabBtn = document.getElementById('tab-btn-mistakes');
+            if (!tabBtn) {
+                tabBtn = document.createElement('button');
+                tabBtn.id = 'tab-btn-mistakes';
+                tabBtn.onclick = () => switchTab('mistakes');
+                tabsContainer.appendChild(tabBtn);
+            }
+            tabBtn.innerHTML = `🔥 Kurtarma Modu <span class="bg-white/30 text-white font-black text-xs px-2 py-1 rounded-full ml-1">${questionsArray.length}</span>`;
+
+            let sectionDiv = document.getElementById('section-mistakes');
+            if (!sectionDiv) {
+                sectionDiv = document.createElement('div');
+                sectionDiv.id = 'section-mistakes';
+                sectionDiv.className = 'section-container bg-gradient-to-br from-amber-50 to-orange-100/50 backdrop-blur-2xl p-6 sm:p-8 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-4 border-amber-200 hidden';
+                
+                const title = document.createElement('h2');
+                title.className = 'text-3xl font-black text-amber-900 mb-4 pb-4 border-b-2 border-amber-200/50 flex items-center gap-3 font-title';
+                title.innerHTML = `🛠️ Hataları Düzelt`;
+                
+                const subtitle = document.createElement('p');
+                subtitle.className = 'text-sm text-amber-800 mb-8 bg-amber-100/80 backdrop-blur p-4 rounded-2xl border border-amber-200 font-medium leading-relaxed';
+                subtitle.innerHTML = 'Hatalı veya boş sorular burada listelendi. Doğru cevaba ulaşana kadar yazmaya devam et. <b>Yazarken anında kontrol edilecek!</b>';
+
+                sectionDiv.appendChild(title);
+                sectionDiv.appendChild(subtitle);
+                
+                const questionsList = document.createElement('div');
+                questionsList.id = 'mistakes-list';
+                questionsList.className = 'space-y-5';
+                sectionDiv.appendChild(questionsList);
+                quizContainer.appendChild(sectionDiv);
+            }
+
+            const questionsList = document.getElementById('mistakes-list');
+            questionsList.innerHTML = ''; 
+            sectionDiv.classList.remove('completed-celebration'); 
+
+            questionsArray.forEach((qStr, index) => {
+                const questionItem = document.createElement('div');
+                questionItem.className = 'flex items-start gap-4 p-5 rounded-2xl bg-white/60 hover:bg-white transition-colors border border-amber-200 shadow-sm question-item relative';
+                
+                const numBadge = document.createElement('span');
+                numBadge.className = 'flex-shrink-0 bg-gradient-to-br from-amber-400 to-orange-500 text-white font-black rounded-xl w-10 h-10 flex items-center justify-center text-sm shadow-[0_4px_10px_rgba(245,158,11,0.3)] mt-1 font-title';
+                numBadge.innerText = index + 1;
+                
+                const qTextContainer = document.createElement('div');
+                qTextContainer.className = 'text-lg leading-loose w-full text-slate-800 font-medium';
+
+                let formattedHTML = qStr.replace(/\[(.*?)\]/g, (match, answer) => {
+                    const boxesHTML = Array.from({length: answer.length}).map(() => 
+                        `<span class="letter-box flex items-center justify-center w-6 h-8 sm:w-8 sm:h-10 border-2 border-amber-300 rounded-md bg-white text-slate-800 font-bold text-lg sm:text-xl uppercase"></span>`
+                    ).join('');
+
+                    return `<span class="inline-flex items-center gap-1 sm:gap-2 mx-1 align-middle whitespace-nowrap">
+                                <span class="relative inline-flex puzzle-container" data-answer="${answer}">
+                                    <input type="text" data-answer="${answer}" class="hidden-puzzle-input practice-input absolute inset-0 w-full h-full opacity-0 z-20 cursor-text" 
+                                           maxlength="${answer.length}"
+                                           oninput="updateVisualBoxes(this);"
+                                           onkeyup="handlePracticeInput(this, 'keyup')" 
+                                           onblur="this.parentElement.classList.remove('is-focused'); handlePracticeInput(this, 'blur')"
+                                           onfocus="this.parentElement.classList.add('is-focused')"
+                                           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                                    <span class="flex gap-1 visual-box-container pointer-events-none">
+                                        ${boxesHTML}
+                                    </span>
+                                </span>
+                            </span>`;
+                });
+
+                qTextContainer.innerHTML = formattedHTML;
+                questionItem.appendChild(numBadge);
+                questionItem.appendChild(qTextContainer);
+                questionsList.appendChild(questionItem);
+            });
+        }
+
+        function handlePracticeInput(input, eventType) {
+            const container = input.closest('.puzzle-container');
+            const wasCorrectBefore = container.classList.contains('correct');
+            container.classList.remove('incorrect', 'revealed', 'hinted');
+            
+            const userAnswerRaw = input.value.trim();
+            const correctAnswerRaw = input.getAttribute('data-answer');
+
+            if (userAnswerRaw === '') {
+                container.classList.remove('correct');
+                return;
+            }
+
+            const dist = levenshtein(normalizeString(userAnswerRaw), normalizeString(correctAnswerRaw));
+            const allowedMistakes = correctAnswerRaw.length <= 3 ? 0 : (correctAnswerRaw.length <= 7 ? 1 : 2);
+
+            if (dist <= allowedMistakes) {
+                container.classList.add('correct');
+                input.value = correctAnswerRaw;
+                updateVisualBoxes(input);
+                input.disabled = true; 
+                if(!wasCorrectBefore) spawnFloatingScore(container);
+                checkAllPracticeDone(); 
+            } else {
+                container.classList.remove('correct');
+                if (eventType === 'blur') container.classList.add('incorrect');
+            }
+        }
+
+        function checkAllPracticeDone() {
+            const practiceSection = document.getElementById('section-mistakes');
+            if(!practiceSection) return;
+            const allInputs = practiceSection.querySelectorAll('.practice-input');
+            const allCorrect = Array.from(allInputs).every(inp => inp.closest('.puzzle-container').classList.contains('correct'));
+            
+            if(allInputs.length > 0 && allCorrect) {
+                if(!practiceSection.classList.contains('completed-celebration')) {
+                    practiceSection.classList.add('completed-celebration');
+                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.7 }, colors: ['#f59e0b', '#ef4444', '#10b981'] });
+                    setTimeout(() => alert("Küllerinden doğdun! Öğrenme modunu başarıyla bitirdin! 🔥🎉"), 600);
+                }
+            }
+        }
+
+        function removeMistakesTab() {
+            const mistakesBtn = document.getElementById('tab-btn-mistakes');
+            const mistakesSec = document.getElementById('section-mistakes');
+            if (mistakesBtn) mistakesBtn.remove();
+            if (mistakesSec) mistakesSec.remove();
+        }
+
+        function showAnswers() {
+            if(activeTab === 'mistakes') return;
+            if(confirm("Tüm cevapları pes edip görmek istediğine emin misin? (Puan kazanılmaz)")) {
+                const inputs = document.querySelectorAll('#section-' + activeTab + ' .hidden-puzzle-input');
+                inputs.forEach(input => {
+                    const container = input.closest('.puzzle-container');
+                    input.value = input.getAttribute('data-answer');
+                    updateVisualBoxes(input);
+                    container.classList.remove('correct', 'incorrect', 'hinted');
+                    container.classList.add('revealed', 'correct');
+                    input.disabled = true;
+                });
+                stopTimer();
+            }
+        }
+    </script>
+</body>
+</html>
