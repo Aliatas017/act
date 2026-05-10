@@ -159,9 +159,9 @@
                     </div>
                     <div>
                         <h1 class="text-lg sm:text-xl font-extrabold text-slate-800 font-title tracking-wide">
-                            Milli Mücadeleye Hazırlık
+                            Milli Mücadele Dev Havuz
                         </h1>
-                        <p class="text-[11px] text-red-600 font-bold tracking-widest uppercase">Karışık 20 Soru Seçildi</p>
+                        <p class="text-[11px] text-red-600 font-bold tracking-widest uppercase">160 Soru İçinden Rastgele 20 Soru</p>
                     </div>
                 </div>
                 
@@ -197,7 +197,7 @@
             <div>
                 <h3 class="font-bold text-red-900 text-lg mb-1 font-title">Nasıl Oynanır?</h3>
                 <p class="text-sm text-slate-700 font-medium leading-relaxed">
-                    Aşağıdaki cümlelerde boş bırakılan kutucuklara doğru tarihi kavramları yazın. Tüm Milli Mücadele Hazırlık (Cemiyetler, Kongreler, Genelgeler, Basın-Yayın) havuzundan <strong>hiç çözmediğiniz karışık 20 soru</strong> seçildi.
+                    Aşağıdaki cümlelerde boş bırakılan kutucuklara doğru tarihi kavramları yazın. Dev KPSS havuzundan (Cemiyetler, Genelgeler, Kongreler, İsyanlar, Cepheler, Kahramanlar) <strong>hiç çözmediğiniz rastgele 20 soru</strong> seçildi.
                     <br>💡 <em>İki kelimeli cevaplarda aradaki tire veya boşlukları dikkate almadan harfleri kutulara doldurun. Yeni sorular için 'Yeni Sorular Getir' butonuna basın!</em>
                 </p>
             </div>
@@ -244,72 +244,169 @@
 
     <!-- JavaScript Logic -->
     <script>
+        // DEV HAVUZ (160 SORU) - KPSS MİLLİ MÜCADELE
         const rawQuestions = [
-            // Cemiyetler
-            "İşgallere karşı gösterilen ilk tepki silahlı direniş değil, bölgesel [cemiyetlerin] kurulmasıdır.",
-            "Yunanistan'ın bağımsızlığını sağlayan ve Megali İdea'yı savunan en eski Rum cemiyeti Etniki [Eterya] 'dır.",
+            "Rumların kurduğu ve Bizans'ı yeniden canlandırmayı amaçlayan en eski cemiyet Etniki [Eterya] 'dır.",
             "Mondros sonrası kurulan ve Patrikhane tarafından desteklenen zararlı Rum cemiyeti [Mavri] [Mira] 'dır.",
-            "Samsun merkezli, Karadeniz'de bir Rum devleti kurmayı amaçlayan cemiyet [Pontus] Rum Cemiyeti'dir.",
-            "Doğu Anadolu'da ve Çukurova'da 'Büyük Ermenistan' devletini kurmayı amaçlayan cemiyetler Hınçak ve [Taşnak] cemiyetleridir.",
-            "İngiliz Mandasını savunan, üyeleri arasında Sait Molla ve Damat Ferit'in bulunduğu cemiyet [İngiliz] [Muhipleri] Cemiyeti'dir.",
-            "Doğrudan Amerikan Mandasını savunan cemiyet [Wilson] Prensipleri Cemiyeti'dir.",
-            "Kars ve çevresinde Ermeni ve İngilizlere karşı kurulan İLK yararlı cemiyet [Kars] [İslam] Şurası'dır.",
-            "Trabzon ve çevresini Pontus Rum ve Kordos cemiyetlerine karşı savunan cemiyet Trabzon [Muhafaza] -i Hukuk Cemiyeti'dir.",
-            "Rum faaliyetlerine karşı kurulan ilk yararlı cemiyet olan ve gerekirse ayrı devlet kurmayı düşünen cemiyet Trakya [Paşaeli] Cemiyeti'dir.",
-            "İzmir'in işgalinden hemen önce kurulan ve Balıkesir-Alaşehir kongrelerini toplayan cemiyet İzmir [Redd] -i [İlhak] Cemiyeti'dir.",
-            "Muğla ve çevresini İtalyanlara karşı savunan yararlı cemiyet [Menteşeliler] Cemiyeti'dir.",
-            "Sivas Valisinin eşi Melek Hanım tarafından Mustafa Kemal'in isteğiyle kurulan cemiyet [Anadolu] [Kadınları] Cemiyeti'dir.",
-            "Adana ve çevresini (Çukurova'yı) Fransız ve Ermenilere karşı savunan cemiyet [Kilikyalılar] Cemiyeti'dir.",
-            "Ulusal nitelikli tek cemiyet olan ve ilk kez 'Kuvâ-yı Milliye' tabirini kullanan cemiyet [Milli] [Kongre] Cemiyeti'dir.",
-            "İttihatçılar tarafından kurulan ve İstanbul'dan Anadolu'ya gizlice silah kaçıran cemiyet [Karakol] Cemiyeti'dir.",
-            "Milli Mücadele'de ilk silahlı direniş güneyde Hatay [Dörtyol] 'da Fransızlara karşı başlamıştır.",
-            "İzmir'de Yunanlılara karşı ilk kurşunu sıkan kahraman gazeteci [Hasan] [Tahsin] 'dir.",
-            "Maraş'ta Fransız ve Ermenilere karşı direnişi başlatan ve simgeleşen kahraman [Sütçü] [İmam] 'dır.",
-            "Batı Anadolu'da başlangıçta yararlı olan ancak sonradan isyan eden Kuvâ-yı Milliye lideri [Çerkez] [Ethem] 'dir.",
-            
-            // Kongreler
-            "Mustafa Kemal'in 9. Ordu Müfettişi sıfatıyla İstanbul Hükümetine sunduğu ilk resmi rapora [Samsun] Raporu denir.",
-            "Mustafa Kemal'in halkı işgallere karşı protesto ve mitingler yapmaya çağırdığı ve tek başına yayınladığı ilk bildiri [Havza] Genelgesi'dir.",
-            "Kurtuluş Savaşı'nın gerekçesi, amacı ve yönteminin belirtildiği ihtilal bildirgesi [Amasya] Genelgesi'dir.",
-            "Amasya Genelgesi'ni kaleme alan Mustafa Kemal'in yaveri [Cevat] [Abbas] Bey'dir.",
-            "Amasya Genelgesi'nde 'Ulusun bağımsızlığını, yine ulusun azim ve [kararı] kurtaracaktır' maddesiyle ilk kez milli egemenlik vurgusu yapılmıştır.",
-            "Milli Mücadeleyi yönetecek bir 'Temsil Heyeti'nin kurulması fikri ilk kez [Amasya] Genelgesi'nde ortaya atılmıştır.",
-            "Mustafa Kemal'in askerlikten istifa edip sine-i millete döndükten sonra sivil olarak katıldığı ilk kongre [Erzurum] Kongresi'dir.",
-            "Erzurum Kongresi toplanış amacı bakımından bölgesel, aldığı kararlar bakımından [ulusal] bir kongredir.",
-            "İlk kez Misak-ı Milli sınırlarından bahsedilen ve manda fikrinin ilk kez reddedildiği kongre [Erzurum] Kongresi'dir.",
-            "Temsil Heyeti'nin ilk kez göreve başladığı ve sadece Doğu vilayetlerini temsil ettiği kongre [Erzurum] Kongresi'dir.",
-            "Her ilden delegelerin katıldığı ve toplanış bakımından tamamen ulusal olan kongre [Sivas] Kongresi'dir.",
-            "Sivas Kongresi'nde manda ve himaye fikri bir daha gündeme gelmemek üzere [kesin] olarak reddedilmiştir.",
-            "Tüm yararlı cemiyetlerin Anadolu ve Rumeli Müdafaa-i Hukuk Cemiyeti adı altında birleştiği kongre [Sivas] Kongresi'dir.",
-            "Sivas Kongresi'nde Temsil Heyeti, Ali Fuat Paşa'yı Batı Cephesi Komutanlığına atayarak ilk kez [yürütme] yetkisini kullanmıştır.",
-            "Temsil Heyeti'nin İstanbul Hükümetine karşı kazandığı ilk siyasi başarı Damat Ferit'in [istifa] etmesidir.",
-            "İstanbul Hükümetinin (Salih Paşa aracılığıyla) Temsil Heyeti'nin varlığını resmen ve hukuken tanıdığı görüşmeler [Amasya] Görüşmeleri'dir.",
-            "Son Osmanlı Mebusan Meclisinde Felah-ı Vatan grubunun çabalarıyla kabul edilen bağımsızlık bildirgesine [Misak] -ı [Milli] denir.",
-            "Mebusan Meclisinin Misak-ı Milli'yi ilan etmesi üzerine İtilaf Devletleri 16 Mart 1920'de [İstanbul] 'u resmen işgal etmiştir.",
-            "Misak-ı Milli kararları içinde siyasi, ekonomik ve hukuki gelişmemizi engelleyen [kapitülasyonlara] ilk kez net tepki gösterilmiştir.",
-            "Mustafa Kemal'in İstanbul'un işgaline tepki olarak Anadolu'da topladığı İtilaf subaylarına uyguladığı tutuklama yöntemine [kısasa] [kısas] denir.",
-
-            // Kültür, Basın, Yayın
-            "Antep savunmasının sembol isimlerinden biri olan ve Fransızlara karşı kahramanca savaşan lider [Şahin] Bey'dir.",
-            "Kastamonu'dan cepheye cephane taşırken bebeğiyle birlikte donarak şehit olan kahraman Türk kadını [Şerife] Bacı'dır.",
-            "Sivas Kongresi'nde halkı bilinçlendirmek amacıyla çıkarılmasına karar verilen gazete [İrade] -i Milliye'dir.",
-            "TBMM'nin yarı resmi yayın organı olan ve 10 Ocak 1920'de Ankara'da çıkarılmaya başlanan gazete [Hakimiyet] -i Milliye'dir.",
-            "Mustafa Kemal'in isteğiyle Yunus Nadi ve Halide Edip tarafından dünyayı bilgilendirmek için kurulan haber ajansı [Anadolu] Ajansı'dır.",
-            "İstiklal Marşı'nın yayınlandığı ilk yerel gazete Kastamonu'da çıkan [Açıksöz] gazetesidir.",
-            "İstiklal Marşı'nın yayınlandığı ilk dergi Mehmet Akif Ersoy'un başyazarlığını yaptığı [Sebilürreşat] dergisidir.",
-            "Peyam-ı Sabah ve Alemdar gazeteleri doğrudan İstanbul Hükümeti yanlısı oldukları için [zararlı] yayınlar kabul edilir.",
-            "Çerkez Ethem öncülüğünde çıkan, Bolşevik yanlısı ve sonradan zararlı hale gelen yayın organı Yeni [Dünya] 'dır.",
-            "Yakup Kadri Karaosmanoğlu'nun Yunan işgalini ve Anadolu köylüsünü anlattığı meşhur romanı [Yaban] 'dır.",
-            "Halide Edip Adıvar'ın Milli Mücadele'yi anlattığı ve kendisinin de bizzat içinde yer aldığı ünlü eseri [Ateşten] [Gömlek] 'tir.",
-            "Mustafa Kemal'in İstanbul'dayken Ali Fethi Okyar ile birlikte çıkardığı, milli fikirleri savunan gazete [Minber] 'dir.",
-            "İstanbul'un resmen işgalini telgrafıyla Ankara'ya ve Mustafa Kemal'e anında bildiren kahraman Manastırlı [Hamdi] Bey'dir.",
-            "İlk asker Atatürk büstünü ve Afyon'daki meşhur Zafer Anıtı'nı yapan heykeltıraş Henry [Krippel] 'dir.",
-            "Milli Mücadele'nin lojistik desteğini (silah ve mühimmat) sağlamak için kullanılan İnebolu-Kastamonu-Ankara güzergahına [İstiklal] Yolu denir.",
-            "Mustafa Kemal'in Samsun Tütün İskelesi'nden Amasya'ya kadar izlediği siyasi güzergaha ise [Kurtuluş] Yolu denir.",
-            "İzmir'de Hasan Tahsin'in yazdığı ve işgallere karşı halkı uyandıran gazetenin adı Hukuk-u [Beşer] 'dir.",
-            "Mustafa Kemal'in Sivas Kongresi'nden sonra komutanlarla buluşup Temsil Heyetinin merkezini Ankara seçtiği toplantı [Komutanlar] Toplantısı'dır.",
-            "Kazım Karabekir'in Kurtuluş Savaşı anılarını topladığı ve özellikle Doğu Cephesini anlattığı eseri İstiklal [Harbimiz] 'dir.",
-            "Milli Mücadele döneminde devletin resmi kararlarının yayımlandığı gazete [Ceride] -i Resmiye'dir."
+            "Merzifon Amerikan Koleji'nde kurulan ve Karadeniz'de devlet kurmayı hedefleyen cemiyet [Pontus] Rum'dur.",
+            "Adana ve Doğu Anadolu'da Ermeni devleti kurmayı hedefleyen cemiyetler Hınçak ve [Taşnak] 'tır.",
+            "Yahudilerin Filistin'de devlet kurmak ve ayrıcalıklarını korumak için kurduğu cemiyet [Alyans] [İsrailit] 'tir.",
+            "İngiliz himayesine girmeyi kurtuluş olarak gören ve Sait Molla'nın öncülük ettiği cemiyet [İngiliz] [Muhipleri] Cemiyeti'dir.",
+            "Amerikan mandasını savunan ve Halide Edip'in de bir dönem üyesi olduğu cemiyet [Wilson] Prensipleri'dir.",
+            "İngiliz desteğiyle doğuda bağımsız bir devlet kurmayı hedefleyen cemiyet [Kürt] [Teali] Cemiyeti'dir.",
+            "Medrese hocaları tarafından kurulan ve kurtuluşun Halifeye bağlılıktan geçtiğini savunan cemiyet [Teali] [İslam] 'dır.",
+            "İttihatçılara karşı olan ve Damat Ferit'in desteklediği padişahçı cemiyet [Sulh] ve [Selameti] Osmaniye'dir.",
+            "Kurtuluşun ancak padişahın emirlerine uymakla mümkün olduğunu savunan eski fırka [Hürriyet] ve İtilaf'tır.",
+            "İşgallere karşı silahlı direnişi ve Kuvay-ı Milliye'yi değil halifeyi savunan askerlerin kurduğu gizli örgüt [Nigehban] Cemiyeti'dir.",
+            "Anadolu'daki ilk milli cemiyet olan ve Ermenilere karşı Kars çevresini savunan [Kars] [İslam] Şurası'dır.",
+            "Gerekirse bağımsız bir devlet kurmayı düşünen ve Edirne-Lüleburgaz kongrelerini yapan cemiyet Trakya [Paşaeli] 'dir.",
+            "İzmir'in işgalini önlemek için kurulan ve Balıkesir ile Alaşehir kongrelerini toplayan İzmir [Müdafaai] [Hukuk] Cemiyeti'dir.",
+            "İzmir'in işgali üzerine silahlı direniş kararı alan ve halkı teşkilatlandıran İzmir [Redd] -i [İlhak] Cemiyeti'dir.",
+            "Doğu Anadolu'nun Ermenilere verilmesini önlemek için kurulan ve Erzurum Kongresini düzenleyen [Doğu] [Anadolu] Müdafaa-i Hukuk'tur.",
+            "Karadeniz bölgesini Pontus Rumlarına karşı savunan Trabzon [Muhafaza] -i Hukuk Cemiyeti'dir.",
+            "Çukurova bölgesini Fransız ve Ermeni işgaline karşı savunan cemiyet [Kilikyalılar] Cemiyeti'dir.",
+            "Sivas Valisi'nin eşi Melek Hanım öncülüğünde kurulan cemiyet [Anadolu] [Kadınları] Müdafaa-i Vatan Cemiyeti'dir.",
+            "Basın ve yayın yoluyla Türklerin haklı davasını dünyaya duyurmaya çalışan tek ulusal cemiyet [Milli] [Kongre] Cemiyeti'dir.",
+            "Dr. Esat Işık tarafından kurulan ve Kuvay-ı Milliye tabirini ilk kullanan cemiyet [Milli] [Kongre] Cemiyeti'dir.",
+            "Muğla ve çevresini İtalyan işgaline karşı savunan yerel cemiyet [Menteşeliler] Cemiyeti'dir.",
+            "Anadolu'ya silah ve cephane kaçırmak, istihbarat sağlamak için kurulan gizli örgüt [Karakol] Cemiyeti'dir.",
+            "TBMM'nin açılmasından sonra istihbarat faaliyetlerini yürüten ve Ankara'ya bağlı olan gizli grup [Mim] [Mim] Grubu'dur.",
+            "İzmir'de Yunanlılara karşı ilk kurşunu sıkan Hukuk-u Beşer gazetesi başyazarı [Hasan] [Tahsin] 'dir.",
+            "Hasan Tahsin'in asıl adı [Osman] [Nevres] 'tir.",
+            "Milli Mücadele'de işgallere karşı ilk silahlı direniş Hatay [Dörtyol] 'da Fransızlara karşı Mehmet Çavuş tarafından yapılmıştır.",
+            "Batı Anadolu'da (Ayvalık'ta) Yunanlılara karşı ilk kurşunu sıkan komutan [Ali] [Çetinkaya] 'dır.",
+            "Maraş'ta Fransız askerlerine ve Ermenilere karşı direnişin sembolü olan kahraman [Sütçü] [İmam] 'dır.",
+            "Antep savunmasında 'Düşman cesedimi çiğnemeden Antep'e giremez' diyerek şehit olan lider [Şahin] Bey'dir.",
+            "Urfa'da Fransızlara karşı direnişi örgütleyen ve şehri savunan Kuva-yı Milliye komutanı [Ali] [Saip] (Ursavaş) Bey'dir.",
+            "Kastamonu'dan Ankara'ya cephane taşırken bebeğiyle donarak şehit olan kahraman kadınımız [Şerife] Bacı'dır.",
+            "Erzurum'da kadınları örgütleyen ve İstiklal Madalyası alan kadın kahramanımız [Kara] [Fatma] (Fatma Seher) Hanım'dır.",
+            "Aydın ve çevresinde Yunanlılara karşı efeleriyle destan yazan Kuvay-ı Milliye lideri [Yörük] [Ali] Efe'dir.",
+            "İzmit ve çevresinde Yunanlılara ve çetelere karşı mücadele eden Kuva-yı Milliye lideri [Yahya] [Kaptan] 'dır.",
+            "Gördes ve Demirci çevresinde eşi Halil Efe ile savaşan ve şehit düşen kahraman kadınımız [Gördesli] [Makbule] 'dir.",
+            "Çukurova'da Fransızlara karşı savaşan ve askerlerine kılavuzluk yapan kadın kahramanımız [Kılavuz] [Hatice] 'dir.",
+            "Güney cephesinde Fransız karargahına saldırarak şehit olan kadın kahramanımız [Tayyar] [Rahmiye] Hanım'dır.",
+            "Batı Anadolu'da başlangıçta çok faydalı olan ancak düzenli orduya katılmak istemeyip isyan eden lider [Çerkez] [Ethem] 'dir.",
+            "Çerkez Ethem'in kurduğu Kuvay-ı Milliye birliğinin özel adı [Kuvayi] [Seyyare] 'dir.",
+            "Demirci Mehmet Efe'nin isyanı da düzenli orduya katılmak istememesinden kaynaklanmış ve [Refet] [Bele] tarafından bastırılmıştır.",
+            "Mustafa Kemal'in 9. Ordu Müfettişi sıfatıyla bölgedeki durumu inceleyip İstanbul'a gönderdiği ilk resmi belge [Samsun] Raporu'dur.",
+            "Türk halkını işgallere karşı mitingler ve protestolar düzenlemeye çağıran ilk genelge [Havza] Genelgesi'dir.",
+            "Havza Genelgesinden sonra ilk büyük protesto mitingi [Fatih] Mitingi olarak İstanbul'da yapılmıştır.",
+            "Kurtuluş Savaşı'nın amacını, gerekçesini ve yöntemini belirten ilk yazılı belge [Amasya] Genelgesi'dir.",
+            "Amasya Genelgesi'nde yer alan 'Vatanın bütünlüğü, milletin bağımsızlığı tehlikededir' maddesi savaşın [gerekçesi] 'dir.",
+            "Milletin bağımsızlığını yine milletin azim ve kararı kurtaracaktır maddesi Kurtuluş Savaşı'nın [amacı] ve [yöntemi] 'dir.",
+            "İlk kez milli egemenlik ilkesinden üstü kapalı da olsa bahsedilen belge [Amasya] Genelgesi'dir.",
+            "Amasya Genelgesi'ni kaleme alan Mustafa Kemal'in yaveri [Cevat] [Abbas] 'tır.",
+            "Milli bir kurulun kurulması fikri ilk kez [Amasya] Genelgesi'nde öne sürülmüştür.",
+            "Amasya Genelgesi'nden sonra Mustafa Kemal [askerlik] mesleğinden ve müfettişlik görevinden istifa etmiştir.",
+            "Mustafa Kemal'in askerlikten istifa ettikten sonra 'Sine-i Millete döndüm' diyerek katıldığı ilk sivil kongre [Erzurum] Kongresi'dir.",
+            "Erzurum Kongresi toplanış amacı ve katılım bakımından bölgesel, aldığı kararlar bakımından [ulusal] bir kongredir.",
+            "Milli sınırlar içinde vatanın bir bütün olduğu ilk kez [Erzurum] Kongresi'nde ifade edilmiştir.",
+            "Manda ve himaye fikri ilk kez [Erzurum] Kongresi'nde reddedilmiştir.",
+            "Sadece Doğu illerini temsil etmek üzere 9 kişiden oluşan [Temsil] [Heyeti] ilk kez Erzurum'da kurulmuştur.",
+            "Temsil Heyeti'nin başkanlığına [Mustafa] [Kemal] seçilmiştir.",
+            "Doğu'daki tüm yararlı cemiyetler Şarki Anadolu Müdafaa-i Hukuk Cemiyeti adı altında [Erzurum] Kongresi'nde birleştirilmiştir.",
+            "Erzurum Kongresi'nin toplanmasında [Kazım] [Karabekir] Paşa'nın 15. Kolordusu büyük destek sağlamıştır.",
+            "Hem toplanış şekli hem de aldığı kararlar bakımından tamamen ulusal olan tek kongre [Sivas] Kongresi'dir.",
+            "Sivas Kongresi'ni engellemek için İstanbul Hükümeti tarafından görevlendirilen Elazığ Valisi [Ali] [Galip] 'tir.",
+            "Ankara Valisi [Muhittin] Paşa da Sivas Kongresi'ni basmakla görevlendirilmiş ancak başarılı olamamıştır.",
+            "Sivas Kongresi'nde Amerikan mandası son kez tartışılmış ve manda fikri [kesin] olarak reddedilmiştir.",
+            "Ülkedeki tüm yararlı cemiyetler [Anadolu] ve [Rumeli] Müdafaa-i Hukuk Cemiyeti adı altında Sivas'ta birleşmiştir.",
+            "Temsil Heyeti'nin üye sayısı artırılmış ve tüm [yurdu] temsil eder hale getirilmiştir.",
+            "Temsil Heyeti, Ali Fuat Paşa'yı Batı Cephesi Komutanlığına atayarak ilk kez [yürütme] yetkisini kullanmıştır.",
+            "Sivas Kongresi'nin başarıyla toplanması üzerine İstanbul'daki [Damat] [Ferit] Paşa hükümeti istifa etmek zorunda kalmıştır.",
+            "Damat Ferit'in istifası, Temsil Heyeti'nin İstanbul'a karşı kazandığı ilk [siyasi] başarıdır.",
+            "Damat Ferit yerine kurulan daha ılımlı Ali Rıza Paşa hükümeti Temsil Heyeti ile [Amasya] Görüşmeleri'ni yapmıştır.",
+            "Amasya Görüşmeleri'ne İstanbul Hükümeti adına Bahriye Nazırı [Salih] Paşa katılmıştır.",
+            "Amasya Görüşmeleri ile İstanbul Hükümeti, Temsil Heyeti'nin varlığını ilk kez [resmen] ve [hukuken] tanımıştır.",
+            "Görüşmelerde alınan en önemli ortak karar [Mebusan] Meclisi'nin yeniden açılmasıdır.",
+            "Mustafa Kemal, meclisin İstanbul'da açılmasını tehlikeli bulmuş ancak meclis [Anayasa] gereği başkent İstanbul'da açılmıştır.",
+            "Batı Anadolu'da direnişi örgütlemek için Hacim Muhittin Bey öncülüğünde [Balıkesir] ve Alaşehir kongreleri yapılmıştır.",
+            "Celal Bayar'ın 'Galip Hoca' takma adıyla katıldığı ve yerel direnişi güçlendiren kongre [Nazilli] Kongresi'dir.",
+            "Mustafa Kemal'in meclis açılmadan önce Adana cephesi için katıldığı yerel kongre [Pozantı] Kongresi'dir.",
+            "Trakya'nın savunması için Cafer Tayyar Paşa liderliğinde Edirne ve [Lüleburgaz] kongreleri düzenlenmiştir.",
+            "Son Osmanlı Mebusan Meclisi'nde Mustafa Kemal'in isteği olan 'Müdafaa-i Hukuk' yerine [Felah] -ı [Vatan] grubu kurulmuştur.",
+            "Felah-ı Vatan grubunun başkanlığına [Rauf] [Orbay] getirilmiştir.",
+            "Son Mebusan Meclisi'nde kabul edilen ve milli sınırları çizen bağımsızlık belgesine [Misak] -ı [Milli] denir.",
+            "Misak-ı Milli kararlarında Kars, Ardahan, Batum ve Batı Trakya için gerekirse [referandum] yapılması istenmiştir.",
+            "Siyasi, mali ve adli gelişmemizi engelleyen [kapitülasyonlar] Misak-ı Milli'de kesin dille reddedilmiştir.",
+            "Misak-ı Milli'nin kabul edilmesi üzerine İtilaf Devletleri 16 Mart 1920'de [İstanbul] 'u resmen işgal etmiştir.",
+            "İstanbul'un işgalini Ankara'daki Mustafa Kemal'e telgrafla haber veren [Manastırlı] [Hamdi] Bey'dir.",
+            "Mustafa Kemal, işgale tepki olarak Anadolu'daki İtilaf subaylarını tutuklatmış, bu yönteme [kısasa] [kısas] denmiştir.",
+            "İstanbul'dan Anadolu'ya düşman sevkiyatını önlemek için Geyve ve [Ulukışla] demiryolları tahrip edilmiştir.",
+            "İstanbul'un işgali ve Mebusan Meclisi'nin dağıtılması, Ankara'da [TBMM] 'nin açılmasını hızlandırmıştır.",
+            "Birinci TBMM, 23 Nisan 1920'de [Olağanüstü] yetkilere sahip bir meclis olarak açılmıştır.",
+            "I. TBMM'de yasama, yürütme ve yargı yetkilerinin tek elde toplanmasına [Güçler] [Birliği] ilkesi denir.",
+            "İlk mecliste bakanların meclis içinden tek tek oylanarak seçildiği sisteme [Meclis] [Hükümeti] sistemi denir.",
+            "TBMM'ye karşı çıkan isyanları bastırmak için çıkarılan kanun [Hıyanet] -i [Vataniye] Kanunu'dur.",
+            "Askerden kaçmaları önlemek amacıyla TBMM tarafından çıkarılan diğer bir kanun [Firariler] Kanunu'dur.",
+            "Bu kanunları uygulamak ve isyancıları yargılamak için meclis üyelerinden oluşan [İstiklal] [Mahkemeleri] kurulmuştur.",
+            "İstanbul Şeyhülislamı Dürrizade'nin milli mücadele karşıtı fetvasına karşılık, Ankara Müftüsü [Rıfat] [Börekçi] karşı fetva yayınlamıştır.",
+            "Doğrudan İstanbul Hükümeti tarafından çıkarılan isyanlar [Kuvayi] [İnzibatiye] ve Ahmet Anzavur isyanlarıdır.",
+            "Hem İstanbul Hükümeti hem de İtilaf Devletleri kışkırtmasıyla çıkan isyanlara Bolu, Düzce, Hendek ve [Adapazarı] isyanları örnek verilebilir.",
+            "Yozgat'ta Çapanoğulları, Afyon'da [Çopur] [Musa] , Konya'da Delibaş Mehmet isyanları çıkmıştır.",
+            "Milli aşireti Urfa'da, [Koçgiri] aşireti ise Erzincan-Sivas dolaylarında isyan etmiştir.",
+            "Eskiden Kuvay-ı Milliyeci olup sonradan isyan edenler Çerkez Ethem ve [Demirci] [Mehmet] Efe'dir.",
+            "Sivas Kongresi kararlarını halka duyurmak için çıkarılan ve Temsil Heyeti'nin ilk yayın organı olan gazete [İrade] -i [Milliye] 'dir.",
+            "TBMM açıldıktan sonra Ankara'da çıkarılan ve meclisin yarı resmi organı olan gazete [Hakimiyet] -i [Milliye] 'dir.",
+            "Mustafa Kemal'in emriyle Halide Edip ve Yunus Nadi tarafından kurulan kurum [Anadolu] [Ajansı] 'dır.",
+            "İstiklal Marşı'nın yayınlandığı ilk yerel gazete Kastamonu'da basılan [Açıksöz] gazetesidir.",
+            "Mehmet Akif Ersoy'un başyazarlığını yaptığı ve İstiklal Marşı'nı yayımlayan ilk dergi [Sebilürreşat] dergisidir.",
+            "Cumhuriyet'in ilanını ilk duyuran ve Yunus Nadi'nin kurduğu yararlı gazete [Yeni] [Gün] 'dür.",
+            "Erzurum Kongresi'nin kararlarını yayan ve Doğu'nun sesi olan gazete [Albayrak] gazetesidir.",
+            "Mustafa Kemal ve Ali Fethi Okyar'ın İstanbul'da ortaklaşa çıkardığı gazete [Minber] gazetesidir.",
+            "Mustafa Kemal'in isimsiz makalelerinin yayınlandığı gazete [İleri] gazetesidir.",
+            "Devletin kanun ve genelgelerinin resmi olarak yayımlandığı yayın organı [Ceride] -i [Resmiye] 'dir.",
+            "Zararlı cemiyetlerin propagandasını yapan ve İstanbul Hükümetini destekleyen en meşhur zararlı gazeteler Peyam-ı Sabah ve [Alemdar] 'dır.",
+            "Çerkez Ethem'in Bolşevik fikirlerini yaydığı ve sonradan zararlı sayılan yayın organı Yeni [Dünya] 'dır.",
+            "Kurtuluş Savaşı'nı anlatan ilk roman olan ve Halide Edip Adıvar'ın yazdığı eser [Ateşten] [Gömlek] 'tir.",
+            "Yakup Kadri Karaosmanoğlu'nun Türk köylüsü ile aydını arasındaki kopukluğu anlattığı ünlü Milli Mücadele romanı [Yaban] 'dır.",
+            "İstanbul'un işgal altındaki ahlaki çöküntüsünü anlatan Yakup Kadri eseri [Sodom] ve [Gomore] 'dir.",
+            "Kazım Karabekir'in Doğu Cephesi'ndeki anılarını topladığı önemli eseri İstiklal [Harbimiz] 'dir.",
+            "Mustafa Kemal'in 1919'da Samsun'a çıkışıyla başlayıp 1927'ye kadar olan dönemi anlattığı eseri [Nutuk] 'tur.",
+            "Nutuk adlı eser '1919 yılı Mayısının 19'uncu günü [Samsun] 'a çıktım' cümlesiyle başlar.",
+            "Nutuk adlı eser Türk gençliğine emanet edilen [Gençliğe] [Hitabe] ile sona erer.",
+            "İstiklal Savaşı'nda Ankara'ya cephane taşınan İnebolu-Kastamonu-Çankırı güzergahına [İstiklal] [Yolu] denir.",
+            "Kurtuluş Savaşı'nda Ankara'daki ilk meclis binasını tasarlayan mimar [Vedat] [Tek] 'tir.",
+            "İlk asker büstünü ve Zafer anıtını yapan meşhur heykeltıraş [Henry] [Krippel] 'dir.",
+            "Doğu Cephesi'nde Ermenilere karşı savaşan 15. Kolordu Komutanı [Kazım] [Karabekir] 'dir.",
+            "TBMM'nin uluslararası alanda imzaladığı ilk antlaşma Ermenistan ile yapılan [Gümrü] Antlaşması'dır.",
+            "Gümrü Antlaşması ile TBMM'yi ve Misak-ı Milli'yi tanıyan İLK devlet [Ermenistan] olmuştur.",
+            "Gümrü Antlaşması ile Kars, Sarıkamış ve [Kağızman] TBMM hükümetine bırakılmıştır.",
+            "TBMM'nin açtığı ilk elçilik [Sovyet] [Rusya] 'da açılmış, ilk elçi Ali Fuat Cebesoy olmuştur.",
+            "TBMM'yi tanıyan İLK Müslüman devlet [Afganistan] olmuştur.",
+            "I. İnönü Savaşı'ndan sonra Sovyet Rusya ile imzalanan ve TBMM'yi tanıyan ilk büyük Avrupa devleti olmasını sağlayan antlaşma [Moskova] Antlaşması'dır.",
+            "Moskova Antlaşması'nda Misak-ı Milli'den verilen İLK taviz [Batum] 'un Gürcistan'a bırakılmasıdır.",
+            "Güney Cephesi'nde Fransız ve Ermenilere karşı sadece [Kuvayi] [Milliye] birlikleri savaşmıştır.",
+            "1921 Ankara Antlaşması ile Fransa Güney Cephesi'nden çekilmiş ve TBMM'yi tanıyan ilk [İtilaf] devleti olmuştur.",
+            "Ankara Antlaşması'nda Misak-ı Milli'den verilen İKİNCİ taviz [Hatay] 'ın Fransa mandasındaki Suriye'ye bırakılmasıdır.",
+            "Batı Cephesi'nde Yunanlılara karşı savaşılmış, Kuva-yı Milliye yetersiz kalınca [Düzenli] [Ordu] kurulmuştur.",
+            "Düzenli ordunun Batı Cephesi'nde kazandığı İLK askeri zafer [Birinci] [İnönü] Savaşı'dır.",
+            "I. İnönü zaferinden sonra İtilaf Devletleri TBMM'yi Londra Konferansına çağırmış, böylece TBMM'yi [hukuken] tanımışlardır.",
+            "Londra Konferansı'na TBMM adına katılan ilk dışişleri bakanımız [Bekir] [Sami] Bey'dir.",
+            "I. İnönü zaferi sonrası, 12 Mart 1921'de bağımsızlığımızın sembolü olan [İstiklal] [Marşı] kabul edilmiştir.",
+            "İstiklal Marşı'nı yazan Mehmet Akif Ersoy, bu marşı [Kahraman] [Ordumuza] ithaf etmiştir.",
+            "İstiklal Marşı yarışmasını düzenleyen kurum [Maarif] (Milli Eğitim) Nezareti'dir.",
+            "İstiklal Marşı'nı meclis kürsüsünde ilk okuyan kişi dönemin Milli Eğitim Bakanı [Hamdullah] [Suphi] Tanrıöver'dir.",
+            "İstiklal Marşı'nın ilk bestecisi Ali Rıfat Çağatay, günümüzdeki (son) bestecisi ise [Osman] [Zeki] Üngör'dür.",
+            "Düzenli ordunun tek yenilgisi olan ve ordunun Sakarya Nehri'nin doğusuna çekildiği savaş [Eskişehir] [Kütahya] savaşlarıdır.",
+            "Eskişehir-Kütahya yenilgisi sonrası meclisin tüm yetkilerini 3 aylığına Mustafa Kemal'e verdiği yasaya [Başkomutanlık] Yasası denir.",
+            "Mustafa Kemal Başkomutan olduktan sonra ordunun ihtiyaçlarını karşılamak için [Tekalifi] [Milliye] emirlerini yayımlamıştır.",
+            "Hattı müdafaa yoktur sathı müdafaa vardır emrinin verildiği 22 gün 22 gece süren savaş [Sakarya] Meydan Muharebesi'dir.",
+            "Sakarya Savaşı'nda çok fazla subay şehit olduğu için bu savaşa [Subaylar] Savaşı da denir.",
+            "Sakarya Zaferi'nden sonra TBMM tarafından Mustafa Kemal'e [Gazi] unvanı ve [Mareşal] rütbesi verilmiştir.",
+            "Sakarya Savaşı sonrası Kafkas Cumhuriyetleri ile doğu sınırımızı KESİN olarak çizen [Kars] Antlaşması imzalanmıştır.",
+            "Ordular ilk hedefiniz Akdeniz'dir İleri! emrinin verildiği savaş [Büyük] [Taarruz] (Başkomutanlık Meydan Muharebesi)'dur.",
+            "Büyük Taarruz'da Yunan başkomutanı [Trikopis] Türk ordusuna esir düşmüştür.",
+            "Askeri safhayı bitiren ve diplomatik safhayı başlatan ateşkes [Mudanya] Ateşkes Antlaşması'dır.",
+            "Mudanya Ateşkesi'nde TBMM'yi başarıyla temsil eden komutan [İsmet] [İnönü] 'dür.",
+            "Doğu Trakya'yı teslim almak üzere TBMM tarafından Trakya Yüksek Komiseri olarak atanan kişi [Refet] [Bele] 'dir.",
+            "Mudanya Ateşkesi ile Osmanlı Devleti başkentinin ve Boğazların TBMM'ye bırakılmasıyla [hukuken] sona ermiştir.",
+            "Lozan Barış Konferansı'na katılmak için İsmet Paşa'nın yanında yer alan delege [Hasan] [Saka] ve Dr. Rıza Nur'dur.",
+            "Lozan görüşmeleri sürerken İtilaf devletlerinin ikilik çıkarmasını engellemek amacıyla 1 Kasım 1922'de [Saltanat] kaldırılmıştır.",
+            "Yeni Türk devletinin tam bağımsızlığını dünyaya kabul ettirdiği kurucu belge [Lozan] Barış Antlaşması'dır.",
+            "Lozan'da çözülemeyen tek konu, İngiltere ile aramızdaki [Musul] (Irak sınırı) meselesi olmuştur.",
+            "Lozan Antlaşması'nda Boğazların yönetimi başkanı Türk olan uluslararası bir [komisyona] bırakılmıştır.",
+            "Yunanistan'ın savaş tazminatı olarak Türkiye'ye bıraktığı bölge [Karaağaç] 'tır."
         ];
 
         const soruHavuzu = {
@@ -317,7 +414,7 @@
         };
 
         const CATEGORIES = [
-            { id: 'karma', title: 'Tüm Konular (Karma)', icon: '🎲' }
+            { id: 'karma', title: '160 Soruluk KPSS Dev Havuz', icon: '🎲' }
         ];
 
         let activeSession = {
@@ -331,6 +428,28 @@
         let timerInterval;
         let secondsElapsed = 0;
         let isTimerRunning = false;
+
+        // Custom Toast Notification System
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            let borderColor = type === 'success' ? 'border-emerald-500' : 'border-amber-500';
+            let icon = type === 'success' ? '🌟' : '🔥';
+            
+            toast.className = `fixed bottom-5 right-5 sm:bottom-10 sm:right-10 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl z-[200] font-bold transform transition-all translate-y-20 opacity-0 flex items-center gap-3 border-l-4 ${borderColor}`;
+            toast.innerHTML = `<span class="text-2xl">${icon}</span> <span class="tracking-wide">${message}</span>`;
+            document.body.appendChild(toast);
+            
+            requestAnimationFrame(() => {
+                toast.style.transform = 'translateY(0)';
+                toast.style.opacity = '1';
+            });
+
+            setTimeout(() => {
+                toast.style.transform = 'translateY(20px)';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 400);
+            }, 4000);
+        }
 
         function levenshtein(a, b) {
             if (a.length === 0) return b.length;
@@ -377,7 +496,7 @@
             let available = pool.filter(q => !usedIds.includes(q.id));
 
             if (available.length < count) {
-                alert(`Tebrikler! Tüm soruları gördün. Soru havuzu başa sarılıyor!`);
+                showToast(`Tebrikler! Havuzdaki tüm (${pool.length}) soruyu gördün. Soru havuzu başa sarılıyor!`, 'success');
                 activeSession.usedQuestions[categoryId] = [];
                 usedIds = activeSession.usedQuestions[categoryId];
                 available = [...pool];
@@ -447,12 +566,12 @@
             inputs.forEach((input, index) => {
                 if (input.value.trim() !== '') saveData[index] = input.value;
             });
-            localStorage.setItem('mmKarmaPuzzleData', JSON.stringify(saveData));
+            localStorage.setItem('mmDevHavuzPuzzleData', JSON.stringify(saveData));
             updateProgressBar();
         }
 
         function loadProgress() {
-            const savedData = JSON.parse(localStorage.getItem('mmKarmaPuzzleData'));
+            const savedData = JSON.parse(localStorage.getItem('mmDevHavuzPuzzleData'));
             if (savedData) {
                 const inputs = document.querySelectorAll('.hidden-puzzle-input');
                 inputs.forEach((input, index) => {
@@ -550,13 +669,14 @@
                 activeSession.usedQuestions = { karma: [] };
             }
 
+            // Çekilecek rastgele soru sayısı: 20
             activeSession.karma = getUnusedRandomItems('karma', 20);
 
-            localStorage.setItem('mmKarmaSession', JSON.stringify(activeSession));
+            localStorage.setItem('mmDevHavuzSession', JSON.stringify(activeSession));
         }
 
         function initializeQuiz() {
-            const savedSession = localStorage.getItem('mmKarmaSession');
+            const savedSession = localStorage.getItem('mmDevHavuzSession');
             if(savedSession) {
                 try {
                     activeSession = JSON.parse(savedSession);
@@ -876,7 +996,7 @@
                 if(!practiceSection.classList.contains('completed-celebration')) {
                     practiceSection.classList.add('completed-celebration');
                     confetti({ particleCount: 150, spread: 70, origin: { y: 0.7 }, colors: ['#f59e0b', '#e11d48', '#10b981'] });
-                    setTimeout(() => alert("Küllerinden doğdun! Öğrenme modunu başarıyla bitirdin! 🔥🎉"), 600);
+                    showToast("Küllerinden doğdun! Öğrenme modunu başarıyla bitirdin!", "success");
                 }
             }
         }
@@ -891,6 +1011,8 @@
         function showAnswers() {
             if(currentTabId === 'mistakes') return;
             
+            // confirm is okay to keep for intentional user actions, but let's make it a custom UI in the future if needed. 
+            // Leaving confirm as is since user triggers it explicitly.
             if(confirm("Tüm cevapları pes edip görmek istediğine emin misin? (Puan kazanılmaz)")) {
                 const inputs = document.querySelectorAll('#section-' + currentTabId + ' .hidden-puzzle-input');
                 inputs.forEach(input => {
@@ -914,7 +1036,7 @@
                  switchTab('karma');
             }
 
-            localStorage.removeItem('mmKarmaPuzzleData');
+            localStorage.removeItem('mmDevHavuzPuzzleData');
             
             generateNewSession();
             renderDOM();
